@@ -1,0 +1,17 @@
+{{/*
+  err
+  Emits a warning using the module's Header.
+
+  @author @regisphilibert
+
+  @context String
+
+  @access public
+
+  @example - Go Template
+  {{ partial "tnd-huge/warn" $message }}
+*/}}
+{{ $header := "Huge" }}
+{{ errorf "\n%s:\n%s" $header . }}
+
+{{ return true }}

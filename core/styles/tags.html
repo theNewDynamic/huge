@@ -1,0 +1,26 @@
+{{/*
+  huge/styles/tags
+  For now a simple wrapper for tnd-styles/tags
+
+  @author @regisphilibert
+
+  @context 
+    See https://github.com/theNewDynamic/hugo-module-tnd-styles/blob/main/partials/tags.html
+
+  @access private
+
+  @returns
+    See See https://github.com/theNewDynamic/hugo-module-tnd-styles/blob/main/partials/tags.html
+
+  @uses
+     - tnd-styles/tags
+
+  @example - Go Template
+    <head>
+    {{ partialCached "huge/styles/tags" (slice "main" "christmas") "main" "christmas" }}
+    {{ if .HasShortcode "carousel" }}
+      {{ partialCached "huge/styles/tags" (slice "carousel") "carousel" }}
+    {{ end }}
+    </head>
+*/}}
+{{ partial "tnd-styles/tags" . }}

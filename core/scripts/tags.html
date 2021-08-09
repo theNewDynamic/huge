@@ -1,0 +1,26 @@
+{{/*
+  huge/scripts/tags
+  For now a simple wrapper for tnd-styles/scripts
+
+  @author @regisphilibert
+
+  @context 
+    See https://github.com/theNewDynamic/hugo-module-tnd-scripts/blob/main/partials/tags.html
+
+  @access private
+
+  @returns
+    See See https://github.com/theNewDynamic/hugo-module-tnd-scripts/blob/main/partials/tags.html
+
+  @uses
+     - tnd-scripts/tags
+
+  @example - Go Template
+    <head>
+    {{ partialCached "huge/scripts/tags" (slice "main" "christmas") "main" "christmas" }}
+    {{ if .HasShortcode "carousel" }}
+      {{ partialCached "huge/scripts/tags" (slice "carousel") "carousel" }}
+    {{ end }}
+    </head>
+*/}}
+{{ partial "tnd-scripts/tags" . }}

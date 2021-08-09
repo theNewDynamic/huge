@@ -1,0 +1,23 @@
+{{/*
+  huge/seo/tags
+  For now a simple wrapper for tnd-seo/tags
+
+  @author @regisphilibert
+
+  @context 
+    See https://github.com/theNewDynamic/hugo-module-tnd-seo/blob/main/partials/tags.html
+
+  @access private
+
+  @returns
+    See See https://github.com/theNewDynamic/hugo-module-tnd-seo/blob/main/partials/tags.html
+
+  @uses
+     - tnd-seo/tags
+
+  @example - Go Template
+    <head>
+    {{ partialCached "huge/seo/tags" . . }}
+    </head>
+*/}}
+{{ partial "tnd-seo/tags" . }}

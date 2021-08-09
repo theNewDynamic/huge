@@ -1,0 +1,12 @@
+{{ $config := dict }}
+{{ $dir := "_huge/config" }}
+{{ $ }}
+{{ with resources.GetMatch (printf "/%s/%s.*" $dir $) }}
+  {{ with .Content }}
+    {{ $config = . | transform.Unmarshal }}
+  {{ end }}
+{{ else }}
+  {{ partial "huge/console/warn" (printf "We could not find %s." (printf "/%s/%s" $dir $)) }}
+{{ end }}
+
+{{ return $config }}

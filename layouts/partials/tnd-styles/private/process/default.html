@@ -1,0 +1,17 @@
+{{/*
+  process/default
+  overwrite original tnd-styles "default" processing way. 
+  This is pending PostCSS is implemented.
+*/}}
+{{ $style := false }}
+{{ with .resource }}
+  {{/* If the resource type is scss or sass, we use the sass logic
+    we will generate a tailwind file, concatenate it with the processed sass and PostCSS it. */}}
+    {{ if eq .MediaType.SubType "x-scss" "sass" }}
+      {{ $style = . | toCSS }}
+    {{ else }}
+      {{ $style = . }}
+    {{ end }}
+{{ end }}
+
+{{ return $style }}

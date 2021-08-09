@@ -1,0 +1,16 @@
+{{/*
+  huge/styles/tags
+  Overwrite Module config storage logic in favor of Huge's
+
+  @author @regisphilibert
+
+  @context Type (.name)
+
+  @access private
+
+  @returns Type
+
+  @uses
+     - huge/config/Get
+*/}}
+{{ return partialCached "huge/config/Get" "styles" "styles" }}
