@@ -1,19 +1,16 @@
 {{/*
   huge/styles/tags
-  For now a simple wrapper for tnd-styles/tags
+  Generate the html tags given the array of maps returned by GetTags
 
   @author @regisphilibert
 
   @context 
-    See https://github.com/theNewDynamic/hugo-module-tnd-styles/blob/main/partials/tags.html
+    Slice of strings
 
   @access private
 
-  @returns
-    See See https://github.com/theNewDynamic/hugo-module-tnd-styles/blob/main/partials/tags.html
-
   @uses
-     - tnd-styles/tags
+     - tnd-tags/tag
 
   @example - Go Template
     <head>
@@ -23,4 +20,6 @@
     {{ end }}
     </head>
 */}}
-{{ partial "tnd-styles/tags" . }}
+{{- range partial "huge/styles/private/GetTags" $ $ -}}
+{{ partial "tnd-tags/tag" . }}
+{{ end -}}

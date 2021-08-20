@@ -1,5 +1,5 @@
 {{/*
-  huge/styles/tags
+  tnd-media/private/GetConfig
   Overwrite Module config storage logic in favor of Huge's
 
   @author @regisphilibert
@@ -13,4 +13,7 @@
   @uses
      - huge/config/Get
 */}}
-{{ return partialCached "huge/config/Get" "fonts" "fonts" }}
+{{ $config := partialCached "huge/config/Get" "media" "media" }}
+{{ $config = merge $config (dict "storage" "assets" ) }}
+
+{{ return $config }}

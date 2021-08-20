@@ -1,0 +1,27 @@
+{{/*
+  huge/styles/DoTransform
+  Determine if a transfromation needs be applied given style parameter.
+
+  @author @regisphilibert
+
+  @context Map (.)
+
+  @access private
+
+  @returns Bool
+
+  @example - Go Template
+    {{ with partialCached "DoTransform" context context }}
+      {{ something = . }}
+    {{ end }}
+*/}}
+{{ $return := false }}
+{{ if eq $ "never" }}
+  {{ $return = false }}
+{{ else if eq $ "always" }}
+  {{ $return = true }}
+{{ else }}
+  {{ $return = partialCached "huge/env/Is" $ $ }}
+{{ end }}
+
+{{ return $return }}

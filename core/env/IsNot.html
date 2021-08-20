@@ -1,0 +1,16 @@
+{{/*
+  IsNot
+  Returns true if project env does not match given string
+
+  @author @regisphilibert
+
+  @context String (.)
+
+  @access public
+
+  @returns Bool
+
+  {{ if partialCached "tnd-env/IsNot" "production" "production" }}
+*/}}
+
+{{ return not (partialCached "huge/env/Is" $ $) }}

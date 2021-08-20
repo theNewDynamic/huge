@@ -1,0 +1,7 @@
+{{ $resource := . }}
+{{ if eq .MediaType.SubType "x-scss" "sass" }}
+  {{ $resource = . | toCSS }}
+{{ end }}
+
+
+{{ return $resource }}

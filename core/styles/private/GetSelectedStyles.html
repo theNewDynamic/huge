@@ -1,0 +1,30 @@
+{{/*
+  huge/styles/private/GetSelectedStyles
+  Returns a list of styles from the registered styles list whose name matches the name 
+  listed as input while preserving the order.
+
+  @author @regisphilibert
+
+  @context Type Slice of strings
+
+  @access private
+
+  @returns Type
+
+  @uses
+     - huge/styles/private/GetRegisteredStyles
+
+*/}}
+{{ $selected_styles := slice }}
+{{ $registered_styles := partial "huge/styles/private/GetRegisteredStyles" "GetRegisteredStyles" }}
+{{ range $ }}
+  {{ with where $registered_styles "name" . }}
+    {{ with index . 0 }}
+      {{ $selected_styles = $selected_styles | append . }}
+    {{ end }}
+  {{ else }}
+    {{ partialCached "huge/console/warn" (printf "A style named %s is invoked but not registered" .) }}
+  {{ end }}
+{{ end }}
+
+{{ return $selected_styles }}
