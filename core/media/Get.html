@@ -30,4 +30,20 @@
       {{ $url = .RelPermalink }}
     {{ end }}
 */}}
-{{ return partial "tnd-media/Get" . }}
+{{ $args := dict }}
+{{ $path := "" }}
+{{ if reflect.IsMap $ }}
+  {{ $path = .path }}
+  {{ $args = . }}
+{{ else }}
+    {{ $path = $ }}
+{{ end }}
+
+{{ $public := print "/" ($path | strings.TrimLeft "/") }}
+
+{{ $args := merge $args (dict
+  "path" $path
+  "public" $public
+) }}
+
+{{ return partial "tnd-media/Get" $args }}
