@@ -1,0 +1,68 @@
+{{/*
+  huge/styles/private/GetTransformations
+  Establish a list of transformation to be applied to a given registered style
+  given some local or global paramaters.
+
+  Available transformations are stored in `huge/styles/private/transforms/`
+  - fingerprint
+  - minify
+  - PostCSS
+  - PostProcess
+  - tailwind
+  - toCSS
+
+  @author @regisphilibert
+
+  @context Map
+
+  @access private
+
+  @returns Slice of strings
+
+  @uses
+    - huge/env/IsProduction
+    - huge/styles/private/DoTransform
+
+  @example - Go Template
+    {{ with partialCached "huge/styles/private/GetTransformations" context context }}
+      {{ something = . }}
+    {{ end }}
+*/}}
+{{ $transformations := slice "toCSS" }}
+{{ $IsProduction := partialCached "huge/env/IsProduction" "IsProduction" }}
+
+{{ $NotServer := not site.IsServer }}
+{{ with .use }}
+  {{ if in . "tailwind" }}
+    {{ $transformations = $transformations | append (slice "tailwind" "PostCSS") }}
+  {{ else }}
+    {{ if in . "postcss" }}
+      {{ $transformations = $transformations | append "PostCSS" }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* Minify and Fingerprint are special transformations:
+  `always` They're always used
+  `never` They're never used
+  `{current environment}` They'll be used
+*/}}
+{{ $minify := .minify | default "production" }}
+{{ if partialCached "huge/styles/private/DoTransform" $minify $minify}}
+  {{ $transformations = $transformations | append "minify" }}
+{{ end }}
+
+{{ $fingerprint := .fingerprint | default "production" }}
+{{ if partialCached "huge/styles/private/DoTransform" $fingerprint $fingerprint}}
+  {{ $transformations = $transformations | append "fingerprint" }}
+{{ end }}
+
+{{ with .use }}
+  {{ if or (in . "tailwind") (in . "postprocess") }}
+    {{ if and (not $IsProduction) $IsProduction }}
+      {{ $transformations = $transformations | append "PostProcess" }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $transformations }}

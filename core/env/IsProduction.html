@@ -1,0 +1,16 @@
+{{/*
+  Is
+  Returns true if project env matches "production"
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access public
+
+  @returns Bool
+
+  {{ if partialCached "tnd-env/IsProduction" "IsProduction" }}
+*/}}
+
+{{ return partialCached "huge/env/Is" "production" "production" }}

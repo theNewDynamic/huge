@@ -1,0 +1,37 @@
+{{/*
+  huge/styles/private/transform/_
+  Returns a resource from a given registered style and apply the needed transformation using
+  the transformation functions available from directory.
+
+  @author @regisphilibert
+
+  @context Map
+
+  @access private
+
+  @returns Resource
+  @uses
+    - huge/styles/private/transform/toCSS?
+    - huge/styles/private/transform/tailwind?
+    - huge/styles/private/transform/PostCSS?
+    - huge/styles/private/transform/minify?
+    - huge/styles/private/transform/fingerprint?
+  @example - Go Template
+    {{ with partialCached "huge/styles/private/transform/_" context context }}
+      {{ something = . }}
+    {{ end }}
+*/}}
+{{ $resource := dict }}
+{{ with resources.Get .path }}
+  {{ $resource = . }}
+{{ else }}
+  {{ partial "huge/console/warn" (printf "Style file with path %s is not found" .path) }}
+{{ end }}
+
+{{ with $resource }}
+  {{ range $.transformations }}
+    {{ $resource = partial (print "huge/styles/private/transform/" .) $resource }}
+  {{ end }}
+{{ end }}
+
+{{ return $resource }}

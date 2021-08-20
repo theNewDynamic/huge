@@ -1,0 +1,37 @@
+{{/*
+  GetResource
+  Gets a resource using applicable method based on storage
+
+  @author @regisphilibert
+
+  @context String (.) path
+
+  @access private
+
+  @returns Resource
+
+  @uses
+     - partial private/GetStorage
+
+  @example - Go Template
+    {{ with partialCached "GetResource" context context }}
+      {{ something = . }}
+    {{ end }}
+*/}}
+
+{{ $path := . }}
+{{ $resource := dict }}
+{{ with $path }}
+  {{ $path := print "/huge_media" . }}
+  {{ with resources.Get $path }}
+    {{ $resource = . }}
+  {{ end }}
+  {{/* If we could not find a matching resource even though Storage is assets or bundle, we warn the user: */}}
+  {{ with $resource }}{{ else }}
+    {{ partial "tnd-media/warn" (printf 
+    `We could not find a Hugo resource at %s`
+      $path) }}
+  {{ end }}
+{{ end }}
+
+{{ return $resource }}

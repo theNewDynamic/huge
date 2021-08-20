@@ -1,0 +1,82 @@
+{{/*
+  huge/styles/private/GetTags
+  Construct the tags data from registered/selected styles to produce the HTML tags
+
+  @author @regisphilibert
+
+  @context Slice/String (.)
+
+  @access private
+
+  @returns Map (complying to https://github.com/theNewDynamic/hugo-module-tnd-tags/blob/main/README.md)
+
+  @uses
+     - huge/styles/private/transform/_
+*/}}
+{{ $tags := slice }}
+
+{{/* For future debug setting */}}
+{{ $dev := partialCached "huge/config/Get" "dev" "dev"}}
+{{ $debug := $dev.debug | default false }}
+
+{{/* Default is printing every registered tags */}}
+{{ $styles := partial "huge/styles/private/GetRegisteredStyles" "GetRegisteredStyles" }}
+
+{{/* If context of partial proves intent of selected styles from registered pool by being
+  either a string or a slice of string then we only treat those*/}}
+{{ $selected_styles := slice }}
+{{ if reflect.IsSlice $ }}
+  {{ $selected_styles = . }}
+{{ else }}
+  {{ if eq (printf "%#T" $) "string" }}
+    {{ $selected_styles = slice $ }}
+  {{ end }}
+{{ end }}
+{{ with $selected_styles }}
+  {{ $styles = partialCached "huge/styles/private/GetSelectedStyles" . . }}
+{{ end }}
+
+{{/* Ranging on the selected styles, apply necessary transformations and produce the tag structure */}}
+{{ range $style := $styles }}
+  {{ $transformations := delimit $style.transformations ", " | default "none" }}
+  {{ with partialCached "huge/styles/private/transform/_" . .name }}
+    {{/* Default assumes this is a link rather than inline */}}
+    {{ $tag := dict 
+      "name" "link" 
+      "attr" (dict 
+        "href" .RelPermalink 
+        "rel" "stylesheet"
+      )
+    }}
+
+    {{/* If inline, we overwrite previously set $tag */}}
+    {{ if $style.inline }}
+      {{ $tag = dict 
+        "name" "style" 
+        "inner" .Content
+      }}
+    {{ end }}
+
+    {{ with $hash := .Data.Integrity }}
+      {{ if $style.integrity }}
+        {{ $tag = merge $tag (dict 
+          "attr" (dict 
+            "integrity" $hash
+          )
+        ) }}
+      {{ end }}
+    {{ end }}
+
+    {{/* If debug, we add a informative attributes */}}
+    {{ if $debug }}
+      {{ $tag = merge $tag (dict 
+        "attr" (dict 
+          "data-transformations" $transformations
+        )
+      ) }}
+    {{ end }}
+    {{ $tags = $tags | append $tag }}
+  {{ end }}
+{{ end }}
+
+{{ return $tags }}

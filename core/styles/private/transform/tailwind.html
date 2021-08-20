@@ -1,0 +1,8 @@
+{{ $tailwind := printf `
+  @tailwind base;
+  %s
+  @tailwind components;
+  @tailwind utilities;
+` .Content }}
+{{ $resource := $tailwind | resources.FromString .Name }}
+{{ return $resource }}

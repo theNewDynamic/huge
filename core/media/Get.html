@@ -1,0 +1,33 @@
+{{/*
+  huge/media/Get
+  For now a simple wrapper for tnd-media/Get
+
+  @author @regisphilibert
+
+  @context 
+    See https://github.com/theNewDynamic/hugo-module-tnd-media/blob/main/partials/Get.html
+
+  @access private
+
+  @returns
+    See See https://github.com/theNewDynamic/hugo-module-tnd-media/blob/main/partials/Get.html
+
+  @uses
+     - tnd-media/Get
+
+  @example - Go Template
+    {{ $path := "/uploads/an-image.jpg" }}
+    {{ with partial "tnd-media/Get" $path }}
+      {{ $url = .RelPermalink }}
+    {{ end }}
+
+    {{ $args := dict 
+      "path" "/uploads/an-image.jpg" 
+      "width" 1024 
+      "height" 100 
+    }}
+    {{ with partial "tnd-imgix/Get" $args }}
+      {{ $url = .RelPermalink }}
+    {{ end }}
+*/}}
+{{ return partial "tnd-media/Get" . }}
