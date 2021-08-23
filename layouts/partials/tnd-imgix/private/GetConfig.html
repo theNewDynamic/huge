@@ -1,0 +1,20 @@
+{{/*
+  tnd-imgix/GetConfig
+  Overwrites tnd-imgix/GetConfig so params can be set through _huge/media.yaml.
+
+  @author @regisphilibert
+
+  @context Anything (.)
+
+  @access private
+
+  @return Map
+  
+*/}}
+{{ $config := dict }}
+{{ with partialCached "huge/config/Get" "media" "media" }}
+  {{ with .imgix }}
+    {{ $config = . }}
+  {{ end }}
+{{ end }}
+{{ return $config }}

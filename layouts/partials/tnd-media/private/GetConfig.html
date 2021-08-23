@@ -14,6 +14,8 @@
      - huge/config/Get
 */}}
 {{ $config := partialCached "huge/config/Get" "media" "media" }}
+{{/* With TND Media module, user cna chose 3 types of storage. Huge only allows one. 
+  This line force the choice of storage type under the hood.  
+*/}}
 {{ $config = merge $config (dict "storage" "assets" ) }}
-
 {{ return $config }}

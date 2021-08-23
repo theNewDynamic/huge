@@ -30,20 +30,27 @@
       {{ $url = .RelPermalink }}
     {{ end }}
 */}}
-{{ $args := dict }}
-{{ $path := "" }}
-{{ if reflect.IsMap $ }}
-  {{ $path = .path }}
-  {{ $args = . }}
-{{ else }}
-    {{ $path = $ }}
-{{ end }}
 
-{{ $public := print "/" ($path | strings.TrimLeft "/") }}
+{{/* In the future we might allow users to choose when the image should be publised.
+  This feature is not released yet on tnd-media but isolated in a branch (https://github.com/theNewDynamic/hugo-module-tnd-media/tree/allow-public-path) 
+  This is to allow easily including a 'public' arg to tnd-media/Get invocations through HUGE.
 
-{{ $args := merge $args (dict
+  {{ $args := dict }}
+  {{ $path := "" }}
+  {{ if reflect.IsMap $ }}
+    {{ $path = .path }}
+    {{ $args = . }}
+  {{ else }}
+      {{ $path = $ }}
+  {{ end }}
+
+  {{ $public := "?" }}
+  {{ $args := merge $args (dict
   "path" $path
   "public" $public
 ) }}
 
-{{ return partial "tnd-media/Get" $args }}
+Until then, we simply pass the current context to tnd-media/Get:
+*/}}
+
+{{ return partial "tnd-media/Get" $ }}

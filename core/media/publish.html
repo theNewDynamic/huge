@@ -1,0 +1,29 @@
+{{/*
+  huge/media/publish
+  Make sure Hugo publishes assets from given directories by invoking their `.RelPermalink` method.
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access public
+
+  @returns Any (We're only returning a value so Hugo does not print anything (linebreaks) in the HTML)
+
+  @uses
+     - parthuge/config/Getial
+*/}}
+{{ $store := "" }}
+{{ $config := partialCached "huge/config/Get" "media" "media" }}
+{{ with $config.publish }}
+  {{ range . }}
+    {{ $path := . | strings.TrimLeft "/" | strings.TrimRight "/" }}
+    {{ with resources.Match (print $path "/**") }}
+      {{ range . }}
+        {{ $store = .RelPermalink }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return true }}

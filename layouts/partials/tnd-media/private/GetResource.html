@@ -18,19 +18,22 @@
       {{ something = . }}
     {{ end }}
 */}}
-
+{{ $dev := partialCached "huge/config/Get" "dev" "dev"}}
+{{ $debug := $dev.debug | default false }}
 {{ $path := . }}
 {{ $resource := dict }}
 {{ with $path }}
-  {{ $path := print "/huge_media" . }}
+  {{ $path := . }}
   {{ with resources.Get $path }}
     {{ $resource = . }}
   {{ end }}
-  {{/* If we could not find a matching resource even though Storage is assets or bundle, we warn the user: */}}
-  {{ with $resource }}{{ else }}
-    {{ partial "tnd-media/warn" (printf 
-    `We could not find a Hugo resource at %s`
-      $path) }}
+  {{/* Only if debug is set: If we could not find a matching resource we warn the user: */}}
+  {{ if $debug }}
+    {{ with $resource }}{{ else }}
+      {{ partial "huge/console/warn" (printf 
+      `DEBUG: We could not find a Hugo resource at %s`
+        $path) }}
+    {{ end }}
   {{ end }}
 {{ end }}
 
