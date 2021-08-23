@@ -1,0 +1,231 @@
+{{/* 
+	Structure SEO Data for a given page
+	+ print tags
+	+ print jsonld
+	
+	@author The New Dynamic
+	
+	@access public
+
+	@context Page 
+
+	@example - Go Template
+		{{ partial "tnd-seo/tags" . }}
+
+  TODO:
+    - [ ] Improve type test on "events", `article` seems very opinated.
+		- [ ] Find a reasonable default image when `site.Params.default_image` is not set.
+		- [ ] Twitter can sport "author" handle on top of the site's. Devise a test for author? 
+		- [ ] Maybe consider another approach to set the twitter_card (summary, etc...)
+		- [ ] Not sure about image size. Following https://docs.imgix.com/best-practices/improving-seo-traffic, we have a 
+			square of 800x800 */}}
+
+ 
+{{/*------------------------------
+	BUILDING SCRATCH SEO OBJECT
+	------------------------------ */}}
+
+{{/* Adding the seo map to scratch which will recieve SEO key/value pairs. */}}
+{{ $s := newScratch }}
+{{ $s.Set "seo" dict  }}
+
+{{ $config := partialCached "tnd-seo/private/GetConfig" "GetConfig" }}
+
+{{/* Dates
+	----------------------------- */}}
+
+{{  if not .PublishDate.IsZero  }}
+{{  $s.SetInMap "seo" "published_time" (.PublishDate.Format "2006-01-02T15:04:05-07:00")  }}
+{{  else if not .Date.IsZero  }}
+{{  $s.SetInMap "seo" "published_time" (.Date.Format "2006-01-02T15:04:05-07:00")  }}
+{{  end  }}
+{{  if not .Lastmod.IsZero  }}
+{{  $s.SetInMap "seo" "updated_time" (.Lastmod.Format "2006-01-02T15:04:05-07:00")  }}
+{{  end  }}
+
+{{/* Description
+	---------------------------- 
+	We use the following order of precedence
+	1. SEO Description, then, if not found,
+	2. Description, then if not found,
+	3. Summary then, if not found,
+	4. site description  */}}
+{{ $description := "" }}
+{{/* 1. SEO Description */}}
+{{ if .Params.seo.description }}
+	{{ $description = .Params.seo.description }}
+{{/* 2. Description
+	    As it could potentially contain HTML tags, we strip them with plainify */}}
+{{ else if .Description }}
+	{{ $description = .Description }}
+{{/* 3. Summary */}}
+{{ else if .Summary }}
+	{{ $description = .Summary }}
+{{  else  }}
+{{/* 4. site description */}}
+	{{ $description = site.Params.Description }}
+{{ end }}
+
+{{ with $description }}
+	{{/* We make sure text is sanitzed before storing as data (to avoid html or markdown) */}}
+	{{ with partialCached "tnd-seo/private/SanitizeText" $description $description }}
+		{{ $s.SetInMap "seo" "description" . }}
+	{{ end }}
+{{ end }}
+
+ 
+{{/* Title
+  ---------------------------- 
+	We use the following logic
+	1. Every pages: `{.Title} | {site.Title}`
+	2. Homepage: , only {site.Title} */}}
+{{ $title := .Title }}
+{{ with .Params.seo.title }}
+	{{ $title = . }}
+{{ end }}
+{{ if not .IsHome }}
+	{{/* 1. `{.Title} | {.Site.Title}` */}}
+	{{  $s.SetInMap "seo" "title" (printf "%s | %s" $title site.Title)  }}
+{{ else }}
+	{{/* 2. `{.Site.Title}` */}}
+	{{ $s.SetInMap "seo" "title" site.Title }}
+{{ end }}
+
+{{/* Site Name
+	---------------------------- */}}
+{{ with $config.site_name }}
+	{{ $s.SetInMap "seo" "site_name" . }}
+{{ else }}
+	{{ $s.SetInMap "seo" "site_name" site.Title  }}
+{{ end }}
+
+{{/* Image
+	---------------------------- */}}
+{{ $img := false }}
+
+{{  with $config.default_image  }}
+	{{  $img = .  }}
+{{  end  }}
+
+{{  with .Params.seo.image  }}
+	{{  $img = .  }}
+{{ else }}
+	{{/* If no SEO IMAGE is set, we look for the .Params.images slice
+		and use the first one if it has an `image` key */}}
+	{{  with .Params.images  }}
+		{{  with index . 0  }}
+			{{ if reflect.IsMap . }}
+				{{  with .image  }}
+					{{  $img = .  }}
+				{{  end  }}
+			{{ else }}
+				{{  $img = .  }}
+			{{ end }}
+		{{  end  }}
+	{{  end  }}
+{{  end  }}
+
+{{/* Finally if after all of the conditional above we are not able to find an image for the page,
+	we resolve to looking for the following: */}}
+{{ if not true }}
+	{{  $img_defaults := slice "/static/logo.jpg" "/static/logo.png" "/uploads/default.jpg"  }}
+	{{ range $path := $img_defaults }}
+		{{ if fileExists . }}
+			{{ $img = strings.TrimLeft "/static" $path }}
+		{{ end }}
+	{{ end }}
+{{ end }}
+{{ with $img }}
+	{{ $s.SetInMap "seo" "image" (. | absURL) }}
+	{{ $s.SetInMap "seo" "image_absolute" (. | absURL) }}
+	{{ $s.SetInMap "seo" "image_relative" . }}
+{{ end }}
+
+{{/* Twitter
+	---------------------------- */}}
+{{ with $img }}
+	{{/* Most of the time we should have an image */}}
+	{{  $s.SetInMap "seo" "twitter_card" "summary_large_image"  }}
+{{ else }}
+	{{/* For edge cases without: */}}
+	{{  $s.SetInMap "seo" "twitter_card" "summary"  }}
+{{ end }}
+
+
+{{/* We check the site config sports a Social.twitter and use as handle */}}
+{{  with .Site.Social.twitter  }}
+	{{  $s.SetInMap "seo" "twitter_handle" (printf "@%s" .)  }}
+{{  end  }}
+
+{{/* We check if the page is not set as private */}}
+{{ with $.Params.seo.private }}
+	{{ $s.SetInMap "seo" "private" true }}
+{{ end }}
+{{ with $.Params.private }}
+	{{ $s.SetInMap "seo" "private" true }}
+{{ end }}
+
+{{/* Type
+	---------------------------- */}}
+{{  $s.SetInMap "seo" "type" "website" }}
+
+{{  if in (slice "blog" "news") .Type  }}
+	{{  $s.SetInMap "seo" "type" "article"  }}
+{{ else if in (slice "article") .Type }}
+	{{  $s.SetInMap "seo" "type" "event"  }}
+{{  end  }}
+
+
+
+
+{{/* Locale and translations
+	---------------------------- */}}
+{{  $s.SetInMap "seo" "locale" .Lang }}
+
+{{ $translations := slice }}
+{{ if .IsTranslated }}
+	{{ range .Translations }}
+			{{ $translations = $translations | append (dict "code" .Lang "permalink" .Permalink) }}
+	{{ end }}
+{{ $s.SetInMap "seo" "translations" $translations }}
+{{ end }}
+
+
+{{/* Canonical
+---------------------------- */}}
+{{ with .Params.seo.canonical }}
+  {{  $s.SetInMap "seo" "canonical" (. | absURL)  }}
+{{ else }}
+{{  $s.SetInMap "seo" "canonical" .Permalink  }}
+{{ end }}
+{{ $seo := $s.Get "seo" }}
+{{ with $config.data }}
+  {{ $data_p := . | strings.TrimLeft "/" }}
+  {{ if templates.Exists (print "partials/" $data_p) }}
+    {{ with partial $data_p (dict "seo" $seo "Page" $) }}
+      {{ $seo = merge $seo . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ if $config.jsonld }}
+	{{ with $seo }}
+		{{ $s.SetInMap "jsonld" "@context" "https://schema.org" }}
+		{{ $s.SetInMap "jsonld" "@type" .type }}
+		{{ $s.SetInMap "jsonld" "headline" .title }}
+		{{ $s.SetInMap "jsonld" "image" .image }}
+		{{ $s.SetInMap "jsonld" "wordcount"  ($.WordCount | string) }}
+		{{ $s.SetInMap "jsonld" "url"  $.Permalink }}
+		{{ $s.SetInMap "jsonld" "datePublished" .published_time }}
+		{{ $s.SetInMap "jsonld" "dateModified" .updated_time }}
+		{{ $s.SetInMap "jsonld" "description" .description }}
+		{{ with $seo.jsonld }}
+			{{ $s.Set "jsonld" (merge ($s.Get "jsonld") . ) }}
+		{{ end }}
+	{{ end }}
+	{{ with $s.Get "jsonld" }}
+		{{ $seo = merge $seo (dict "jsonld" .) }}
+	{{ end }}
+{{ end }}
+
+{{ return $seo }}
