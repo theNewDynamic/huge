@@ -1,10 +1,10 @@
 {{/*
   huge/env/Is
-  Returns true if project env matches given string
+  Returns true if project env matches a given string or is present in a given slice of strings.
 
   @author @regisphilibert
 
-  @context String (.)
+  @context String | Slice (.)
 
   @access public
 
@@ -12,6 +12,13 @@
 
   {{ if partialCached "tnd-env/Is" "production" "production" }}
 */}}
-
+{{ $return := false }}
 {{ $env := partialCached "huge/env/Get" "Get" }}
-{{ return eq $env $ }}
+
+{{ if reflect.IsSlice $ }}
+  {{ $return = in $ $env }}
+{{ else }}
+  {{ $return = eq $env $ }}
+{{ end }}
+
+{{ return $return }}
