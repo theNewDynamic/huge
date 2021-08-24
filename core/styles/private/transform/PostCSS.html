@@ -1,2 +1,2 @@
-{{ $resource := . | resources.PostCSS (dict "config" "/postcss.config.js") }}
+{{ $resource := . | resources.PostCSS }}
 {{ return $resource }}
