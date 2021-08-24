@@ -1,0 +1,5 @@
+
+{{ with $ }}
+  {{ $yaml := .| jsonify | transform.Remarshal "yaml" }}
+  {{ highlight $yaml "yaml" "" }}
+{{ end }}

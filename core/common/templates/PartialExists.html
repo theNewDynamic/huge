@@ -1,0 +1,30 @@
+{{/*
+  PartialExists
+  Most templates.Exists are done on partials. This speeds up the process.
+
+  @author @regisphilibert
+
+  @context String (.)
+
+  @access public
+
+  @return Bool
+
+  @example - Go Template
+    {{ $partial := "_global/some.html" }}
+    {{ if partialCached "huge/common/templates/PartialExists" $partial $partial }}
+      {{ partial $partial }}
+    {{ end }}
+*/}}
+
+{{ $bool := false }}
+{{ $path := $ }}
+{{ if not (path.Ext $) }}
+  {{ $path = print $path ".html" }}
+{{ end }}
+
+{{ if templates.Exists (printf "partials/%s" $path) }}
+  {{ $bool = true }}
+{{ end }}
+
+

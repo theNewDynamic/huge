@@ -1,12 +1,30 @@
+{{/*
+  config/Get
+  Retrieves the configuration of a given configuration file stored in `_huge/config/` whose basename matches a given string
+
+  @author @regisphilibert
+
+  @context String (.)
+
+  @access public
+
+  @returns Map
+
+  @uses
+     - config/private/process/map"
+
+  @example - Go Template
+    {{ with partialCached "huge/config/Get" "media" "media" }}
+      {{ $media_config = . }}
+    {{ end }}
+*/}}
 {{ $config := dict }}
 {{ $dir := "_huge/config" }}
-{{ $ }}
 {{ with resources.GetMatch (printf "/%s/%s.*" $dir $) }}
   {{ with .Content }}
     {{ $config = . | transform.Unmarshal }}
   {{ end }}
-{{ else }}
-  {{ partial "huge/console/warn" (printf "We could not find %s." (printf "/%s/%s" $dir $)) }}
+  {{/* For now root config of a feature will always be a Map. We therefor process it as a Map */}}
+  {{ $config = partialCached "huge/config/private/process/map" $config $config }}
 {{ end }}
-
 {{ return $config }}

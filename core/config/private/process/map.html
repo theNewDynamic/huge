@@ -1,0 +1,35 @@
+{{/*
+  config/private/process/slice
+  One of the process functions targeting a type of map.
+
+  @author @regisphilibert
+
+  @context Type (.name)
+
+  @access private
+
+  @returns Map
+
+*/}}
+{{ $s := newScratch }}
+{{ $s.Set "data" dict }}
+
+{{ range $key, $value := . }}
+  {{ with . }}
+    {{ if partialCached "huge/common/reflect/IsString" $value $value }}
+      {{ $s.SetInMap "data" $key (partialCached "huge/config/private/process/string" $value $value) }}
+    {{ else if reflect.IsSlice $value }}
+      {{ $s.SetInMap "data" $key (partialCached "huge/config/private/process/slice" $value $value) }}
+    {{ else if reflect.IsMap $value }}
+      {{ $s.SetInMap "data" $key (partialCached "huge/config/private/process/map" $value $value) }}
+    {{ else }}
+      {{ $s.SetInMap "data" $key $value }}
+    {{ end }}
+  {{ else }}
+    {{ $s.SetInMap "data" $key . }}
+  {{ end }}
+  
+{{ end }}
+
+
+{{ return $s.Get "data" }}

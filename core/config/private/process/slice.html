@@ -1,0 +1,25 @@
+{{/*
+  config/private/process/slice
+  One of the process functions targeting a type of slice.
+
+  @author @regisphilibert
+
+  @context Type (.name)
+
+  @access private
+
+  @returns Slice
+
+*/}}
+{{ $data := slice }}
+{{ range $key, $value := . }}
+  {{ if partialCached "huge/common/reflect/IsString" $value $value }}
+    {{ $data = $data | append (partialCached "huge/config/private/process/string" $value $value) }}
+  {{ else if reflect.IsMap $value }}
+    {{ $data = $data | append (partialCached "huge/config/private/process/map" $value $value) }}
+  {{ else }}
+    {{ $data = $data | append $value }}
+  {{ end }}
+{{ end }}
+
+{{ return $data }}

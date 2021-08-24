@@ -1,0 +1,18 @@
+{{/*
+  reflect/IsString
+  Check if passed value is of type "string"
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access public
+
+  @returns Bool
+
+  @example - Go Template
+    {{ if partialCached "reflect/IsString" $value $value }}
+      We have a string!
+    {{ end }}
+*/}}
+{{ return eq (printf "%#T" .) "string" }}

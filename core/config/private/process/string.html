@@ -1,0 +1,24 @@
+{{/*
+  config/private/process/string
+  One of the process functions targeting a type of slice. 
+  If a string matching a configuration function syntax is found, we invoke the function processing partial.
+
+  @author @regisphilibert
+
+  @context Type (.name)
+
+  @access private
+
+  @returns String or Any if configuration function is found
+
+*/}}
+{{ $return := . }}
+{{ $input := . }}
+{{ $pattern := partialCached "huge/config/private/GetFunctionRegex" "GetFunctionRegex" }}
+{{/* if the string matches the syntax of a config function, we process it as such */}}
+{{ with findRE $pattern $input }}
+  {{ $return = partialCached "huge/config/private/process/function" $input $input }}
+{{ end }}
+
+
+{{ return $return }}

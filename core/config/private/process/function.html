@@ -1,0 +1,33 @@
+{{/*
+  config/private/process/function
+  One of the process functions targeting a HUGE madeup type of configuration function. It finds the partial path from the input and attemps to call such partial to return its value.
+
+  @author @regisphilibert
+
+  @context String (.)
+
+  @access private
+
+  @returns Any
+
+*/}}
+{{ $return := . }}
+{{ $pattern := partialCached "huge/config/private/GetFunctionRegex" "GetFunctionRegex" }}
+{{ with $partial := replaceRE $pattern "$1" $ }}
+  {{/* For some reason, using `huge/common/templates/PartialExists` to perform the test has Hugo running the partial no matter what,
+    thus breaking the build on a "partial not found" rather than letting Huge break the build with its message 
+    So we run the test from this partial.
+    */}}
+  {{ $path := $partial }}
+  {{ if not (path.Ext $partial) }}
+    {{ $path = print $path ".html" }}
+  {{ end }}
+
+  {{ if templates.Exists (printf "partials/%s" $path) }}
+    {{ $return = partialCached $partial "no_context" }}
+  {{ else }}
+    {{ partial "huge/console/err" (printf "We did not find %s partial. Config `return` statement should point to an existing partial" $partial) }}
+  {{ end }}
+{{ end }}
+
+{{ return $return }}
