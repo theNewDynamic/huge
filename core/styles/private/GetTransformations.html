@@ -48,12 +48,12 @@
   `{current environment}` They'll be used
 */}}
 {{ $minify := .minify | default "production" }}
-{{ if partialCached "huge/styles/private/DoTransform" $minify $minify}}
+{{ if partialCached "huge/env/When" $minify $minify}}
   {{ $transformations = $transformations | append "minify" }}
 {{ end }}
 
 {{ $fingerprint := .fingerprint | default "production" }}
-{{ if partialCached "huge/styles/private/DoTransform" $fingerprint $fingerprint}}
+{{ if partialCached "huge/env/When" $fingerprint $fingerprint}}
   {{ $transformations = $transformations | append "fingerprint" }}
 {{ end }}
 

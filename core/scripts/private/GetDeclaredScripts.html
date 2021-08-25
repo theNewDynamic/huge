@@ -1,0 +1,71 @@
+{{/*
+  huge/scripts/private/GetDeclaredScripts
+  Retrieves the scripts declared through config and apply the necessary logic before returning
+  a slice with proper data.
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @returns Slice of Maps
+  - String .name
+    Map or String .defines
+    Bool .fingerprint
+    String .format
+    Bool .inline
+    Slice .inject
+    Slice .externals
+    Bool .minify
+    Map .params
+    Map .shims
+    String .target
+
+*/}}
+{{ $config := partialCached "huge/config/Get" "scripts" "scripts" }}
+{{ $scripts := slice }}
+{{ with $config.scripts }}
+  {{ range $script := . }}
+    {{ with .path }}
+      {{ $name := . }}
+      {{ with $script.name }}
+        {{ $name = . }}
+      {{ end }}
+      {{/* Huge will not take a null value (emtpy slice) as context for a returning partial,
+        we therfore default on "none" for $defines, and test the type of context from within the partial */}}
+      {{ $defines := $script.defines | default "none" }}
+      {{ $defines = partialCached "huge/scripts/private/GetDefines" $defines $defines }}
+      {{ $inline := $script.inline | default false }}
+      {{ $inject := $script.inject | default slice }}
+      {{ $externals := $script.externals | default slice }}
+      {{ $format := $script.format | default "iife" }}
+      {{ $integrity := $script.integrity | default false }}
+      {{ $minify := $script.minify | default "production" }}
+      {{ $minify = partialCached "huge/env/When" $minify $minify }}
+      {{ $fingerprint := $script.fingerprint | default "production" }}
+      {{ $fingerprint = partialCached "huge/env/When" $fingerprint $fingerprint }}
+      {{ $params := $script.params | default dict }}
+      {{ $shims := $script.shims | default slice }}
+      {{ $target := $script.target | default "esnext" }}
+
+      {{ $scripts = $scripts | append (dict
+        "name" $name
+        "path" $script.path
+        "defines" $defines
+        "format" $format
+        "integrity" $integrity
+        "inline" $inline
+        "inject" $inject
+        "externals" $externals
+        "minify" $minify
+        "fingerprint" $fingerprint
+        "params" $params
+        "shims" $shims
+        "target" $target
+      ) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $scripts }}

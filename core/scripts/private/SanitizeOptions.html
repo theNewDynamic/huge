@@ -1,0 +1,15 @@
+{{ $s := newScratch }}
+{{ $s.Set "data" dict }}
+
+{{ $excludes := slice
+  "name"
+  "path"
+}}
+
+{{ range $key, $value := $ }}
+  {{ if not (in $excludes $key) }}
+    {{ $s.SetInMap "data" $key $value }}
+  {{ end }}
+{{ end }}
+
+{{ return $s.Get "data" }}

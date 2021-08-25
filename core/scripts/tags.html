@@ -1,26 +1,25 @@
 {{/*
   huge/scripts/tags
-  For now a simple wrapper for tnd-styles/scripts
+  A wrapper for huge/scripts/private/tags
+  This is the public face of the functionnality. It calls its private counterpart with the 
+  proper caching logic so users don't have to.
 
   @author @regisphilibert
 
   @context 
-    See https://github.com/theNewDynamic/hugo-module-tnd-scripts/blob/main/partials/tags.html
+    Slice or String
 
-  @access private
-
-  @returns
-    See See https://github.com/theNewDynamic/hugo-module-tnd-scripts/blob/main/partials/tags.html
+  @access public
 
   @uses
-     - tnd-scripts/tags
+    - huge/scripts/private/tags
 
   @example - Go Template
     <head>
-    {{ partialCached "huge/scripts/tags" (slice "main" "christmas") "main" "christmas" }}
+    {{ partial "huge/scripts/tags" (slice "main" "christmas") }}
     {{ if .HasShortcode "carousel" }}
-      {{ partialCached "huge/scripts/tags" (slice "carousel") "carousel" }}
+      {{ partial "huge/scripts/tags" (slice "carousel") }}
     {{ end }}
     </head>
 */}}
-{{ partial "tnd-scripts/tags" . }}
+{{ partialCached "huge/scripts/private/tags" $ $ }}

@@ -1,0 +1,31 @@
+{{/*
+  huge/scripts/private/GetSelectedScripts
+  Returns a list of styles from the registered styles list whose name matches the name 
+  listed as input while preserving the order.
+
+  @author @regisphilibert
+
+  @context Type Slice of strings
+
+  @access private
+
+  @returns Slice of Maps
+    See scripts/private/GetDeclaredScripts@returns
+
+  @uses
+     - huge/scripts/private/GetDeclaredScripts
+
+*/}}
+{{ $selected_scripts := slice }}
+{{ $declared_scripts := partial "huge/scripts/private/GetDeclaredScripts" "GetDeclaredScripts" }}
+{{ range $ }}
+  {{ with where $declared_scripts "name" . }}
+    {{ with index . 0 }}
+      {{ $selected_scripts = $selected_scripts | append . }}
+    {{ end }}
+  {{ else }}
+    {{ partialCached "huge/console/warn" (printf "A script named %s is invoked but not declared" .) }}
+  {{ end }}
+{{ end }}
+
+{{ return $selected_scripts }}
