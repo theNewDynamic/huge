@@ -59,7 +59,7 @@
 
 {{ with .use }}
   {{ if or (in . "tailwind") (in . "postprocess") }}
-    {{ if and (not $IsProduction) $IsProduction }}
+    {{ if and $NotServer $IsProduction }}
       {{ $transformations = $transformations | append "PostProcess" }}
     {{ end }}
   {{ end }}

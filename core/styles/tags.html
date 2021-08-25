@@ -20,6 +20,6 @@
     {{ end }}
     </head>
 */}}
-{{- range partial "huge/styles/private/GetTags" $ $ -}}
+{{- range partialCached "huge/styles/private/GetTags" $ $ -}}
 {{ partial "tnd-tags/tag" . }}
 {{ end -}}
