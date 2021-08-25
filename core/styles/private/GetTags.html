@@ -20,7 +20,7 @@
 {{ $debug := $dev.debug | default false }}
 
 {{/* Default is printing every registered tags */}}
-{{ $styles := partial "huge/styles/private/GetRegisteredStyles" "GetRegisteredStyles" }}
+{{ $styles := partial "huge/styles/private/GetDeclaredStyles" "GetDeclaredStyles" }}
 
 {{/* If context of partial proves intent of selected styles from registered pool by being
   either a string or a slice of string then we only treat those*/}}
