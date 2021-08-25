@@ -1,0 +1,30 @@
+{{/*
+  huge/env/When
+  Returns a bool when testing a string:
+   never: false
+   always: true
+   {env}: true
+
+  @author @regisphilibert
+
+  @context Map (.)
+
+  @access private
+
+  @returns Bool
+
+  @example - Go Template
+    {{ with partialCached "When" "production" "production" }}
+      Yes let's do it!
+    {{ end }}
+*/}}
+{{ $return := false }}
+{{ if eq $ "never" }}
+  {{ $return = false }}
+{{ else if eq $ "always" }}
+  {{ $return = true }}
+{{ else }}
+  {{ $return = partialCached "huge/env/Is" $ $ }}
+{{ end }}
+
+{{ return $return }}

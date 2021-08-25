@@ -1,0 +1,36 @@
+{{/*
+  huge/scripts/private/transform/_
+  Returns a resource from a given declared script and apply the needed transformation.
+  This is much lighter than style/transform as, aside from fingerprint, js.Build is the only transformation we need.
+
+  @author @regisphilibert
+
+  @context Map
+
+  @access private
+
+  @returns Resource
+  
+  @uses
+    - huge/scripts/private/SanitizeOptions
+
+*/}}
+{{ $resource := dict }}
+{{ with resources.Get .path }}
+  {{ $resource = . }}
+{{ else }}
+  {{ partial "huge/console/warn" (printf "Style file with path %s is not found" .path) }}
+{{ end }}
+
+{{ with $resource }}
+  {{ $options := partial "huge/scripts/private/SanitizeOptions" $ }}
+  {{ $resource = . | js.Build $options }}
+{{ end }}
+
+{{/* Fingerprinting is the only settings which is not part of the js.Build $options,
+  we perform that extra transformation here if needed. */}}
+{{ if $.fingerprint }}
+  {{ $resource = $resource | fingerprint }}
+{{ end }}
+
+{{ return $resource }}

@@ -1,0 +1,83 @@
+{{/*
+  huge/scripts/private/GetTags
+  Construct the tags data from declared/selected scripts to produce the HTML tags
+
+  @author @regisphilibert
+
+  @context Slice/String (.)
+
+  @access private
+
+  @returns Map (complying to https://github.com/theNewDynamic/hugo-module-tnd-tags/blob/main/README.md)
+
+  @uses
+     - huge/scripts/private/transform
+*/}}
+{{ $tags := slice }}
+
+{{/* For future debug setting */}}
+{{ $dev := partialCached "huge/config/Get" "dev" "dev"}}
+{{ $debug := $dev.debug | default false }}
+
+{{/* Default is printing every registered tags */}}
+{{ $scripts := partial "huge/scripts/private/GetDeclaredScripts" "GetDeclaredScripts" }}
+
+{{/* If context of partial proves intent of selected styles from registered pool by being
+  either a string or a slice of string then we only treat those*/}}
+{{ $selected_scripts := slice }}
+{{ if reflect.IsSlice $ }}
+  {{ $selected_scripts = . }}
+{{ else }}
+  {{ if eq (printf "%#T" $) "string" }}
+    {{ $selected_scripts = slice $ }}
+  {{ end }}
+{{ end }}
+{{ with $selected_scripts }}
+  {{ $scripts = partialCached "huge/scripts/private/GetSelectedScripts" . . }}
+{{ end }}
+
+{{/* Ranging on the selected scripts, apply the js transformation */}}
+{{ range $script := $scripts }}
+  {{ with partialCached "huge/scripts/private/transform/_" . .name }}
+    {{/* Default assumes this is a script rather than inline */}}
+    {{ $tag := dict 
+      "name" "script" 
+      "attr" (dict 
+        "src" .RelPermalink 
+        "type" "text/javascript"
+        "crossorigin" "anonymous" 
+        "defer" "defer"
+      )
+    }}
+
+    {{/* If inline, we overwrite previously set $tag */}}
+    {{ if $script.inline }}
+      {{ $tag = dict 
+        "name" "script" 
+        "inner" .Content
+      }}
+    {{ end }}
+
+    {{ with $hash := .Data.Integrity }}
+      {{ if $script.integrity }}
+        {{ $tag = merge $tag (dict 
+          "attr" (dict 
+            "integrity" $hash
+          )
+        ) }}
+      {{ end }}
+    {{ end }}
+
+    {{/* If debug, we add a informative attributes */}}
+    {{ if and $debug false }}
+      {{ $tag = merge $tag (dict 
+        "attr" (dict 
+          "data-debug" slice
+        )
+      ) }}
+    {{ end }}
+    {{ $tags = $tags | append $tag }}
+  {{ end }}
+{{ end }}
+
+{{ return $tags }}

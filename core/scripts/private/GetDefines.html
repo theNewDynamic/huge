@@ -1,0 +1,50 @@
+{{/*
+  GetDefines
+  Retrieves the list of defines to be passed to js.Build.
+  We load some environment variables.
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @returns Map
+
+  @uses
+     - huge/config/Get
+
+*/}}
+{{ $s := newScratch }}
+{{ $s.Set "defines" dict }}
+
+{{ $config := partialCached "huge/config/Get" "scripts" "scripts" }}
+{{ $env := partialCached "huge/env/Get" "Get" }}
+
+{{/* We make NODE_ENV consistent with HUGO_ENV */}}
+{{ range slice "HUGO_ENV" "NODE_ENV" }}
+  {{ $s.SetInMap "defines" (printf "process.env.%s" .) (printf `"%s"` $env) }}
+{{ end }}
+
+{{/* Next we try and retrieve keys passed to the configuration's env_keys */}}
+{{ with $config.env_keys }}
+  {{ if reflect.IsSlice . }}
+    {{ range $var := . }}
+      {{ with getenv . }}
+        {{ $key := print "process.env." $var }}
+        {{ $value := printf `"%s"` . }}
+        {{ $s.SetInMap "defines" $key $value }}
+      {{ end }}
+    {{ end }}
+  {{ else }}
+    {{ partial "huge/console/warn" "Scripts: The `env_keys` should be a slice." }}
+  {{ end }}
+{{ end }}
+{{/*  Currently not passing the string proper... not sure why */}}
+{{ if reflect.IsMap $ }}
+  {{ range $key, $value := $ }}
+    {{ $s.SetInMap "defines" $key (printf `"%s"` $value) }}
+  {{ end }}
+{{ end }}
+
+{{ return $s.Get "defines" }}
