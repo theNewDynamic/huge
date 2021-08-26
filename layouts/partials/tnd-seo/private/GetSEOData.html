@@ -94,7 +94,7 @@
 {{ with $config.site_name }}
 	{{ $s.SetInMap "seo" "site_name" . }}
 {{ else }}
-	{{ $s.SetInMap "seo" "site_name" site.Title  }}
+	{{ $s.SetInMap "seo" "site_name" site.Title }}
 {{ end }}
 
 {{/* Image
@@ -110,8 +110,11 @@
 {{ else }}
 	{{/* If no SEO IMAGE is set, we look for the .Params.images slice
 		and use the first one if it has an `image` key */}}
-	{{  with .Params.images  }}
-		{{  with index . 0  }}
+	{{ with .Params.image }}
+		{{ $img = . }}
+	{{ end }}
+	{{ with .Params.images  }}
+		{{ with index . 0  }}
 			{{ if reflect.IsMap . }}
 				{{  with .image  }}
 					{{  $img = .  }}
@@ -127,9 +130,13 @@
 {{  end  }}
 
 {{ with $img }}
-	{{ $s.SetInMap "seo" "image" (. | absURL) }}
-	{{ $s.SetInMap "seo" "image_absolute" (. | absURL) }}
-	{{ $s.SetInMap "seo" "image_relative" . }}
+	{{ $args := dict "path" . "width" 1200 }}
+	{{ with partialCached "huge/media/Get" $args $args }}
+		{{ $s.SetInMap "seo" "image" .RelPermalink }}
+		{{ $s.SetInMap "seo" "image_original" $img }}
+		{{ $s.SetInMap "seo" "image_absolute" .Permalink }}
+		{{ $s.SetInMap "seo" "image_relative" .RelPermalink }}
+	{{ end }}
 {{ end }}
 
 {{/* Twitter
@@ -185,11 +192,13 @@
 {{ else }}
 {{  $s.SetInMap "seo" "canonical" .Permalink  }}
 {{ end }}
+
+
 {{ $seo := $s.Get "seo" }}
-{{ with $config.data }}
+{{ with "huge/seo/data.html" }}
   {{ $data_p := . | strings.TrimLeft "/" }}
   {{ if templates.Exists (print "partials/" $data_p) }}
-    {{ with partial $data_p (dict "seo" $seo "Page" $) }}
+    {{ with partial $data_p (dict "SEO" $seo "Page" $) }}
       {{ $seo = merge $seo . }}
     {{ end }}
   {{ end }}
