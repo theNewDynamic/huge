@@ -1,0 +1,67 @@
+{{/*
+  ParseFontface
+  Turns a Font declaration data into fontface ready parseable data.
+
+  @author @regisphilibert
+
+  @context Map
+
+  @access private
+
+  @use
+    - huge/fonts/privateParseFont
+
+  @return Map
+    String (.font-family)
+    String (.src)
+    String (.font-weight)?
+    String (.font-style)?
+    String (.font-display)?
+
+*/}}
+
+{{ $s := newScratch }}
+{{ $s.Set "font" dict }}
+
+{{ with $font := partialCached "huge/fonts/private/ParseFont" . . }}
+  {{ with .resources }}
+    {{ $css_srcs := slice }}
+    {{/* First we add the local() declarations if .local is found */}}
+    {{ with $font.local }}
+      {{ range . }}
+        {{ $css_srcs = $css_srcs | append (printf `local("%s")` .) }}
+      {{ end }}
+    {{ end }}
+
+    {{ range . }}
+      {{ $format := .MediaType.SubType }}
+      {{ $irregular := dict "vnd.ms-fontobject" "embedded-opentype" "ttf" "truetype" "font-sfnt" "truetype" "otf" "opentype" }}
+      {{ with index $irregular $format }}
+        {{ $format = . }}
+      {{ end }}
+      {{ $css_srcs = $css_srcs | append (printf `url("%s") format("%s")` .RelPermalink $format) }}
+    {{ end }}
+    {{ with $css_srcs }}
+      {{ $s.SetInMap "font" "src" (delimit . ",\n") }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ $properties := slice "family" "weight" "style" "display" "variant" "feature-settings" "variation-settings" "stretch" }}
+{{/* In order to tolerate if user uses `font-{property}: value` in the settings instead of `{property}: value`,
+we add font-{property} to the valid properties */}}
+{{ range $properties }}
+  {{ $properties = $properties | append (print "font-" .) }}
+{{ end }}
+{{ range $property := $properties }}
+  {{ with index $ . }}
+    {{ $key := $property }}
+    {{/* If missing font- we prepend the property */}}
+    {{ if not (in $key "font-") }}
+      {{ $key = print "font-" $property }}
+    {{ end }}
+    {{ $s.SetInMap "font" $key . }}
+  {{ end }}
+{{ end }}
+
+{{ return $s.Get "font" }}

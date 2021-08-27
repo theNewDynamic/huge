@@ -1,0 +1,24 @@
+{{/*
+  fontface.html
+  Prints the fontface declaration of a given font.
+  To be consumed from an assets "ExecutedAsTemplate".
+  
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @use
+    - huge/fonts/private/GetFonts
+    - huge/fonts/private/ParseFontface
+*/}}
+{{- range partialCached "huge/fonts/private/GetFonts" . -}}
+{{- with partialCached "huge/fonts/private/ParseFontface" . . -}}
+  @font-face {
+{{- range $key, $val := . }}
+  {{ $key }}: {{ $val }};
+{{- end }}
+}
+{{ end }}
+{{- end -}}

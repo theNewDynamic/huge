@@ -15,12 +15,13 @@ markup:
         title: true
 module:
   mounts:
+  - source: assets
+    target: assets
   - source: layouts
     target: layouts
   - source: core
     target: layouts/partials/huge
 
   imports:
-  - path: github.com/theNewDynamic/hugo-module-tnd-styles
   - path: github.com/theNewDynamic/hugo-module-tnd-seo
   - path: github.com/theNewDynamic/hugo-module-tnd-media

@@ -1,0 +1,39 @@
+{{/*
+  ParseFont
+  Parse data from Module's settings font declaration. For now it only adds a .resources containing the font files assets.
+
+  @author @regisphilibert
+
+  @context Map
+
+  @access private
+
+  @return Map
+      String (.family)
+      String (.file)
+      Resources (.resources)
+      Slice (.local)
+      String (.family)?
+      String (.weight)?
+      String (.style)?
+      String (.display)?
+      String (.variant)?
+      String (.feature-settings)?
+      String (.variation-settings)?
+      
+
+*/}}
+{{ $font := . }}
+{{ with .file }}
+  {{ with resources.Match (print "/" . ".*") }}
+    {{ $font = merge $font (dict "resources" .) }}
+  {{ else }}
+  {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `%s`.\nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
+  {{ end }}
+{{ end }}
+
+{{ with partialCached "huge/fonts/private/GetLocals" . . }}
+  {{ $font = merge $font (dict "local" .) }}
+{{ end }}
+
+{{ return $font }}

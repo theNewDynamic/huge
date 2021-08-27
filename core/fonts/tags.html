@@ -1,1 +1,22 @@
-{{ partialCached "tnd-styles/tags" (slice "fonts") "fonts" }}
+{{/*
+  huge/fonts/tags
+  Generate the html tags given the array of maps returned by GetTags
+
+  @author @regisphilibert
+
+  @context 
+    Slice of strings
+
+  @access private
+
+  @uses
+     - tnd-tags/tag
+
+  @example - Go Template
+    <head>
+    {{ partialCached "huge/fonts/tags" "any" }}
+    </head>
+*/}}
+{{- range partialCached "huge/fonts/private/GetTags" $ $ -}}
+{{ partial "tnd-tags/tag" . }}
+{{ end -}}

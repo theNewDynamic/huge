@@ -1,0 +1,29 @@
+{{/*
+  GetLocals
+  Returns a list of local source declaration based on declaration settings
+
+  @author @regisphilibert
+
+  @context Map 
+
+  @access private
+
+  @return Slice of strings
+*/}}
+{{ $local := slice }}
+
+{{ with .local }}
+  {{/* This safely append the value of .local (a string or a slice) to the $local slice */}}
+  {{ $local = $local | append . }}
+{{ else }}
+  {{/* If local is not set, we'll build it ourselves based on the font family name */}}
+  {{ with .family }}
+    {{ $local = $local | append . }}
+    {{/* If a whitespace is in the family name, we can add a local with dash in place of ws */}}
+    {{ if in . " " }}
+      {{ $local = $local | append (replace . " " "-") }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $local }}

@@ -1,0 +1,17 @@
+{{/*
+  fonts.css
+  A simple wrapper for the private/fonts.html to be invoked as "ExecuteFromTemplate" resource
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @use
+    - fonts/private/fonts.html
+
+  @example - Go Template
+  {{ $fontface := resources.Get "tnd-styles/fonts.css" | resources.ExecuteAsTemplate "fonts.css" . }}
+*/}}
+{{ partial "huge/fonts/private/fontface.html" "no_context" }}

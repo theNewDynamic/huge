@@ -1,0 +1,30 @@
+{{/*
+  GetFonts
+  Retrieve the list of font declaration set through the Module's settings and add the resources matching the
+  .file value.
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @use
+    - huge/fonts/privateGetConfig
+    - huge/fonts/privateParseFont
+
+  @return Slice of maps
+    - See private/ParseFont
+*/}}
+{{ $fonts := slice }}
+{{ with partialCached "huge/config/Get" "fonts" "fonts" }}
+  {{ with .fonts }}
+    {{ range . }}
+      {{ with partialCached "huge/fonts/private/ParseFont" . . }}
+        {{ $fonts = $fonts | append . }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $fonts }}
