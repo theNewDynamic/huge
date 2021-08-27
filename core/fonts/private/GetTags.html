@@ -1,0 +1,48 @@
+
+{{/*
+  huge/fonts/private/GetTags
+  Construct the tags data from declared fonts to produce the HTML tags
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @returns Slice of Maps (complying to https://github.com/theNewDynamic/hugo-module-tnd-tags/blob/main/README.md)
+
+  @uses
+     - huge/fonts/private/GetFonts
+*/}}
+{{ $tags := slice }}
+{{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
+
+{{/* We generate a resource from Template (to facilitate future manipulation/http request) */}}
+{{ $fontface := resources.Get "/huge_only/fontface.css" | resources.ExecuteAsTemplate "fontface.css" "no_context" }}
+{{/* Add the tag with Resource's .Content for "inner" */}}
+{{ $fontface_tag := dict 
+  "name" "style"
+  "inner" $fontface.Content
+}} 
+{{ $tags = $tags | append $fontface_tag }}
+
+{{/* If prefetching is enabled on the package's config */}}
+{{ $prefetch := $config.prefetch | default "always" }}
+{{ if partialCached "huge/env/When" $prefetch $prefetch }}
+  {{/* We list all the fonts in order to produce the data for the "prefetch" tags on all its required files */}}
+  {{ range partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
+    {{ range .resources }}
+      {{ $tag := dict
+        "name" "link"
+        "attr" (dict
+          "href" .RelPermalink
+          "as" "font"
+          "crossorigin" " "
+          "rel" "prefetch"
+      )}}
+      {{ $tags = $tags | append $tag }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $tags }}
