@@ -47,7 +47,16 @@
   {{ end }}
 {{ end }}
 
-{{ $properties := slice "family" "weight" "style" "display" "variant" "feature-settings" "variation-settings" "stretch" }}
+{{ $properties := slice 
+  "family"
+  "weight"
+  "style"
+  "display"
+  "variant"
+  "feature-settings"
+  "variation-settings"
+  "stretch" 
+}}
 {{/* In order to tolerate if user uses `font-{property}: value` in the settings instead of `{property}: value`,
 we add font-{property} to the valid properties */}}
 {{ range $properties }}
