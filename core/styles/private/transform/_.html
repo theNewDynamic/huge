@@ -28,7 +28,18 @@
   {{ partial "huge/console/warn" (printf "Style file with path %s is not found" .path) }}
 {{ end }}
 
+{{ $variables := slice }}
+{{ with .params }}
+  {{ range $key, $value := . }}
+    {{ $variables = $variables | append (printf "--%s:%s" $key $value) }}
+  {{ end }}
+{{ end }}
 {{ with $resource }}
+  {{ with $variables }}
+    {{ $variables_resource := printf ":root{%s}" (delimit $variables ";") | resources.FromString (print "vars_" $.path) }}
+    {{ $resource = slice $variables_resource $resource | resources.Concat $.path }}
+  {{ end }}
+
   {{ range $.transformations }}
     {{ $resource = partial (print "huge/styles/private/transform/" .) $resource }}
   {{ end }}
