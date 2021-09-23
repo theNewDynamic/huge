@@ -36,7 +36,7 @@
         we therfore default on "none" for $defines, and test the type of context from within the partial */}}
       {{ $defines := $script.defines | default "none" }}
       {{ $defines = partialCached "huge/scripts/private/GetDefines" $defines $defines }}
-      {{ $inline := $script.inline | default false }}
+      {{ $internal := $script.internal | default false }}
       {{ $inject := $script.inject | default slice }}
       {{ $externals := $script.externals | default slice }}
       {{ $format := $script.format | default "iife" }}
@@ -55,7 +55,7 @@
         "defines" $defines
         "format" $format
         "integrity" $integrity
-        "inline" $inline
+        "internal" $internal
         "inject" $inject
         "externals" $externals
         "minify" $minify

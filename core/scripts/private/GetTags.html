@@ -51,7 +51,7 @@
     }}
 
     {{/* If inline, we overwrite previously set $tag */}}
-    {{ if $script.inline }}
+    {{ if $script.internal }}
       {{ $tag = dict 
         "name" "script" 
         "inner" .Content
