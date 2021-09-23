@@ -40,7 +40,7 @@
 {{ range $style := $styles }}
   {{ $transformations := delimit $style.transformations ", " | default "none" }}
   {{ with partialCached "huge/styles/private/transform/_" . .name }}
-    {{/* Default assumes this is a link rather than inline */}}
+    {{/* Default assumes this is external (link) rather than internal */}}
     {{ $tag := dict 
       "name" "link" 
       "attr" (dict 
@@ -49,8 +49,8 @@
       )
     }}
 
-    {{/* If inline, we overwrite previously set $tag */}}
-    {{ if $style.inline }}
+    {{/* If internal, we overwrite previously set $tag */}}
+    {{ if $style.internal }}
       {{ $tag = dict 
         "name" "style" 
         "inner" .Content
