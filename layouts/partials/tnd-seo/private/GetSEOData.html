@@ -132,7 +132,7 @@
 {{ with $img }}
 	{{ $args := dict "path" . "width" 1200 }}
 	{{ with partialCached "huge/media/Get" $args $args }}
-		{{ $s.SetInMap "seo" "image" .RelPermalink }}
+		{{ $s.SetInMap "seo" "image" .Permalink }}
 		{{ $s.SetInMap "seo" "image_original" $img }}
 		{{ $s.SetInMap "seo" "image_absolute" .Permalink }}
 		{{ $s.SetInMap "seo" "image_relative" .RelPermalink }}
