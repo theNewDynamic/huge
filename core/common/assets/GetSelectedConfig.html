@@ -1,7 +1,8 @@
 {{/*
-  huge/scripts/private/assets/GetSelected
-  Returns a list of assets data built from the user defined list of either string or maps
-  listed as input while preserving the order.
+  huge/common/assets/GetSelectedConfig
+  This function brings consistency to the way Scripts and Styles retrieves data from config.
+  It reads a list of selected assets to be processed, and try and match them with declared assets,
+  before returning the data to be consumed by each features' respective `GetSelectedScripts/GetSelectedStyles`
 
   @author @regisphilibert
 
@@ -18,21 +19,30 @@
      - huge/scripts/private/GetDeclaredScripts
 
 */}}
+
+{{/* First item in the context slice is the assets found in config */}}
 {{ $declared_assets := index $ 0 }}
+{{/* Second item is the assets passed through the partial /tags context. */}}
 {{ $selected_assets := index $ 1 }}
+
 {{ $assets := slice }}
 {{ range $asset_ref := $selected_assets }}
   {{ $entry := dict }}
+  {{/* If entry is a map we'll store it and then try and match map from config with the same .name */}}
   {{ if reflect.IsMap . }}
     {{ $entry = . }}
     {{ with .name }}
       {{ with where $declared_assets "name" . }}
         {{ with index . 0 }}
+          {{/* If matching config map found, we merge the this one on top of it
+            This ways user can overwrite config settings from the templates. */}}
           {{ $entry = merge . $entry }}
         {{ end }}
       {{ end }}
     {{ end }}
   {{ else }}
+    {{/* If entry is not a map, then it must be a string representing the name of a map stored in config.transition
+      We must therefor find its match */}}
     {{ with $declared_assets }}
       {{ with where . "name" $asset_ref }}
         {{ with index . 0 }}
@@ -43,6 +53,8 @@
       {{ end }}
     {{ end }}
   {{ end }}
+
+  {{/* We only use the entry if it holds a .path */}}
   {{ with $entry.path }}
     {{ $assets = $assets | append $entry }}
   {{ end }}
