@@ -53,13 +53,11 @@
   {{ $transformations = $transformations | append "minify" }}
 {{ end }}
 
-{{/* It appears there is no point fingerprinting an asset which is internal */}}
-{{ if not .internal }}
-  {{ $fingerprint := .fingerprint | default "production" }}
-  {{ if partialCached "huge/env/When" $fingerprint $fingerprint }}
-    {{ $transformations = $transformations | append "fingerprint" }}
-  {{ end }}
+{{ $fingerprint := .fingerprint | default "production" }}
+{{ if partialCached "huge/env/When" $fingerprint $fingerprint }}
+  {{ $transformations = $transformations | append "fingerprint" }}
 {{ end }}
+
 
 {{ with .use }}
   {{ if or (in . "tailwind") (in . "postprocess") }}
