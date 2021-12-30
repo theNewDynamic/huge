@@ -19,25 +19,9 @@
 {{ $dev := partialCached "huge/config/Get" "dev" "dev"}}
 {{ $debug := $dev.debug | default false }}
 
-{{/* Default is printing every registered tags */}}
-{{ $styles := partial "huge/styles/private/GetDeclaredStyles" "GetDeclaredStyles" }}
-
-{{/* If context of partial proves intent of selected styles from registered pool by being
-  either a string or a slice of string then we only treat those*/}}
-{{ $selected_styles := slice }}
-{{ if reflect.IsSlice $ }}
-  {{ $selected_styles = . }}
-{{ else }}
-  {{ if eq (printf "%#T" $) "string" }}
-    {{ $selected_styles = slice $ }}
-  {{ end }}
-{{ end }}
-{{ with $selected_styles }}
-  {{ $styles = partialCached "huge/styles/private/GetSelectedStyles" . . }}
-{{ end }}
 
 {{/* Ranging on the selected styles, apply necessary transformations and produce the tag structure */}}
-{{ range $style := $styles }}
+{{ range $style := partial "huge/styles/private/GetSelectedStyles" $ }}
   {{ $transformations := delimit $style.transformations ", " | default "none" }}
   {{ with partialCached "huge/styles/private/transform/_" . .name }}
     {{/* Default assumes this is external (link) rather than internal */}}
@@ -56,7 +40,7 @@
         "inner" .Content
       }}
     {{ end }}
-
+    
     {{ with $hash := .Data.Integrity }}
       {{ if $style.integrity }}
         {{ $tag = merge $tag (dict 

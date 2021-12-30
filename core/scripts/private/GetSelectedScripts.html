@@ -1,31 +1,40 @@
 {{/*
   huge/scripts/private/GetSelectedScripts
-  Returns a list of styles from the registered styles list whose name matches the name 
-  listed as input while preserving the order.
+  Returns the properly parsed script data from user selected list.
 
   @author @regisphilibert
 
-  @context Type Slice of strings
+  @context Slice of Strings/Maps
 
   @access private
 
-  @returns Slice of Maps
-    See scripts/private/GetDeclaredScripts@returns
-
   @uses
-     - huge/scripts/private/GetDeclaredScripts
+  - huge/config/Get
+
+  @returns Slice of Maps
+  - huge/scripts/private/ParseScript@return
 
 */}}
+{{ $scripts := slice }}
+
+{{ $declared_scripts := slice }}
+
+{{ $config := partialCached "huge/config/Get" "scripts" "scripts" }}
+{{ with $config.scripts }}
+  {{ $declared_scripts = . }}
+{{ end }}
+{{/* If context of partial proves intent of selected styles from registered pool by being
+  either a string or a slice of string then we only treat those*/}}
 {{ $selected_scripts := slice }}
-{{ $declared_scripts := partial "huge/scripts/private/GetDeclaredScripts" "GetDeclaredScripts" }}
-{{ range $ }}
-  {{ with where $declared_scripts "name" . }}
-    {{ with index . 0 }}
-      {{ $selected_scripts = $selected_scripts | append . }}
-    {{ end }}
-  {{ else }}
-    {{ partialCached "huge/console/warn" (printf "A script named %s is invoked but not declared" .) }}
+{{ if reflect.IsSlice $ }}
+  {{ $selected_scripts = . }}
+{{ else }}
+  {{ $selected_scripts = slice $ }}
+{{ end }}
+{{ with $selected_scripts }}
+  {{ with partial "huge/common/assets/GetSelectedConfig" (slice $declared_scripts $selected_scripts) }}
+    {{ $scripts = apply . "partial" "huge/scripts/private/ParseScript" "." }}
   {{ end }}
 {{ end }}
 
-{{ return $selected_scripts }}
+{{ return $scripts }}

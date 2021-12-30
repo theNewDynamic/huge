@@ -29,6 +29,7 @@
     {{ end }}
 */}}
 {{ $transformations := slice "toCSS" }}
+
 {{ $IsProduction := partialCached "huge/env/IsProduction" "IsProduction" }}
 
 {{ $NotServer := not site.IsServer }}
@@ -53,9 +54,10 @@
 {{ end }}
 
 {{ $fingerprint := .fingerprint | default "production" }}
-{{ if partialCached "huge/env/When" $fingerprint $fingerprint}}
+{{ if partialCached "huge/env/When" $fingerprint $fingerprint }}
   {{ $transformations = $transformations | append "fingerprint" }}
 {{ end }}
+
 
 {{ with .use }}
   {{ if or (in . "tailwind") (in . "postprocess") }}

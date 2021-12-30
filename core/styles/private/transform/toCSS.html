@@ -1,5 +1,6 @@
 {{ $resource := . }}
-{{ if eq .MediaType.SubType "x-scss" "sass" }}
+{{/* We only transform if using sass file and Hugo version is "extended" */}}
+{{ if and (eq .MediaType.SubType "x-scss" "sass") hugo.IsExtended }}
   {{ $resource = . | toCSS }}
 {{ end }}
 

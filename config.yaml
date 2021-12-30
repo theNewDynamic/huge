@@ -16,6 +16,7 @@ markup:
 module:
   hugoVersion:
     extended: true
+    # Bumping minVersion? Search comments for +minVer+ first.
     min: "0.86.1"
   mounts:
   - source: assets
