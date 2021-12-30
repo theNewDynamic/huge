@@ -19,26 +19,9 @@
 {{ $dev := partialCached "huge/config/Get" "dev" "dev"}}
 {{ $debug := $dev.debug | default false }}
 
-{{/* Default is printing every registered tags */}}
-{{ $scripts := partial "huge/scripts/private/GetDeclaredScripts" "GetDeclaredScripts" }}
-
-{{/* If context of partial proves intent of selected styles from registered pool by being
-  either a string or a slice of string then we only treat those*/}}
-{{ $selected_scripts := slice }}
-{{ if reflect.IsSlice $ }}
-  {{ $selected_scripts = . }}
-{{ else }}
-  {{ if eq (printf "%#T" $) "string" }}
-    {{ $selected_scripts = slice $ }}
-  {{ end }}
-{{ end }}
-{{ with $selected_scripts }}
-  {{ $scripts = partialCached "huge/scripts/private/GetSelectedScripts" . . }}
-{{ end }}
-
 {{/* Ranging on the selected scripts, apply the js transformation */}}
-{{ range $script := $scripts }}
-  {{ with partialCached "huge/scripts/private/transform/_" . .name }}
+{{ range $script := partial "huge/scripts/private/GetSelectedScripts" $ }}
+  {{ with partial "huge/scripts/private/transform/_" . }}
     {{/* Default assumes this is a script rather than inline */}}
     {{ $tag := dict 
       "name" "script" 

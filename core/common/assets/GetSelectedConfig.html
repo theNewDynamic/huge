@@ -1,0 +1,52 @@
+{{/*
+  huge/scripts/private/assets/GetSelected
+  Returns a list of assets data built from the user defined list of either string or maps
+  listed as input while preserving the order.
+
+  @author @regisphilibert
+
+  @context Slice
+  - Slice of maps (Declared Assets to try and match from)
+  - Slice of maps/string (Selected Assets from the top most context)
+
+  @access private
+
+  @returns Slice of Maps
+    See scripts/private/GetDeclaredScripts@returns
+
+  @uses
+     - huge/scripts/private/GetDeclaredScripts
+
+*/}}
+{{ $declared_assets := index $ 0 }}
+{{ $selected_assets := index $ 1 }}
+{{ $assets := slice }}
+{{ range $asset_ref := $selected_assets }}
+  {{ $entry := dict }}
+  {{ if reflect.IsMap . }}
+    {{ $entry = . }}
+    {{ with .name }}
+      {{ with where $declared_assets "name" . }}
+        {{ with index . 0 }}
+          {{ $entry = merge . $entry }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ else }}
+    {{ with $declared_assets }}
+      {{ with where . "name" $asset_ref }}
+        {{ with index . 0 }}
+          {{ $entry = . }}
+        {{ end }}
+      {{ else }}
+        {{ partialCached "huge/console/warn" (printf "An asset named %s is invoked but not declared" $asset_ref) }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ with $entry.path }}
+    {{ $assets = $assets | append $entry }}
+  {{ end }}
+
+{{ end }}
+
+{{ return $assets }}

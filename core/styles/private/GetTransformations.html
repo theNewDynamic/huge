@@ -29,6 +29,7 @@
     {{ end }}
 */}}
 {{ $transformations := slice "toCSS" }}
+
 {{ $IsProduction := partialCached "huge/env/IsProduction" "IsProduction" }}
 
 {{ $NotServer := not site.IsServer }}
@@ -52,9 +53,12 @@
   {{ $transformations = $transformations | append "minify" }}
 {{ end }}
 
-{{ $fingerprint := .fingerprint | default "production" }}
-{{ if partialCached "huge/env/When" $fingerprint $fingerprint}}
-  {{ $transformations = $transformations | append "fingerprint" }}
+{{/* It appears there is no point fingerprinting an asset which is internal */}}
+{{ if not .internal }}
+  {{ $fingerprint := .fingerprint | default "production" }}
+  {{ if partialCached "huge/env/When" $fingerprint $fingerprint }}
+    {{ $transformations = $transformations | append "fingerprint" }}
+  {{ end }}
 {{ end }}
 
 {{ with .use }}
