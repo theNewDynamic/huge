@@ -20,11 +20,11 @@
 */}}
 {{ $config := dict }}
 {{ $dir := "_huge/config" }}
+
 {{ with resources.GetMatch (printf "/%s/%s.*" $dir $) }}
   {{ with .Content }}
     {{ $config = . | transform.Unmarshal }}
   {{ end }}
-  {{/* For now root config of a feature will always be a Map. We therefor process it as a Map */}}
-  {{ $config = partialCached "huge/config/private/process/map" $config $config }}
 {{ end }}
+
 {{ return $config }}
