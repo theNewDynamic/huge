@@ -30,9 +30,8 @@
 */}}
 {{ $transformations := slice "toCSS" }}
 
-{{ $IsProduction := partialCached "huge/env/IsProduction" "IsProduction" }}
-
 {{ $NotServer := not site.IsServer }}
+
 {{ with .use }}
   {{ if in . "tailwind" }}
     {{ $transformations = $transformations | append (slice "tailwind" "PostCSS") }}
@@ -58,13 +57,11 @@
   {{ $transformations = $transformations | append "fingerprint" }}
 {{ end }}
 
-
-{{ with .use }}
-  {{ if or (in . "tailwind") (in . "postprocess") }}
-    {{ if and $NotServer $IsProduction }}
-      {{ $transformations = $transformations | append "PostProcess" }}
+{{ if $NotServer }}
+  {{ with .use }}
+    {{ if or (in . "tailwind") (in . "postprocess") }}
+        {{ $transformations = $transformations | append "PostProcess" }}
     {{ end }}
   {{ end }}
 {{ end }}
-
 {{ return $transformations }}
