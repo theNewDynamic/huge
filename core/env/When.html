@@ -7,7 +7,7 @@
 
   @author @regisphilibert
 
-  @context Map (.)
+  @context String | Slice of Strings (.)
 
   @access private
 
@@ -19,12 +19,21 @@
     {{ end }}
 */}}
 {{ $return := false }}
+
+{{ $env := partialCached "huge/env/Get" "Get" }}
+
 {{ if eq $ "never" }}
   {{ $return = false }}
 {{ else if eq $ "always" }}
   {{ $return = true }}
 {{ else }}
-  {{ $return = partialCached "huge/env/Is" $ $ }}
+  {{/* If the context is a Slice, we'll test all the slice's strings against the current environment */}}
+  {{ if reflect.IsSlice $ }}
+    {{ $return = in $ $env }}
+  {{/* Else, we just test the lone string */}}
+  {{ else }}
+    {{ $return = eq $ $env }}
+  {{ end }}
 {{ end }}
 
 {{ return $return }}
