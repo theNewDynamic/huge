@@ -22,43 +22,58 @@
 {{/* Ranging on the selected scripts, apply the js transformation */}}
 {{ range $script := partial "huge/scripts/private/GetSelectedScripts" $ }}
   {{ with partial "huge/scripts/private/transform/_" . }}
-    {{/* Default assumes this is a script rather than inline */}}
-    {{ $tag := dict 
-      "name" "script" 
-      "attr" (dict 
-        "src" .RelPermalink 
-        "type" "text/javascript"
-        "crossorigin" "anonymous" 
-        "defer" "defer"
-      )
+    {{ $inline_attr := dict }}
+    {{ $external_attr := dict 
+      "src" .RelPermalink
+      "type" "text/javascript"
     }}
-
-    {{/* If inline, we overwrite previously set $tag */}}
-    {{ if $script.internal }}
-      {{ $tag = dict 
-        "name" "script" 
-        "inner" .Content
-      }}
+    {{/* Following will only be applied to external scripts */}}
+    {{/* We test loading strategy and add the argument if set */}}
+    {{ with $script.load }}
+      {{ if ne . "none" }}
+        {{ $external_attr = merge $external_attr (dict 
+          . ""
+        ) }}
+      {{ end }}
     {{ end }}
-
-    {{ with $hash := .Data.Integrity }}
-      {{ if $script.integrity }}
-        {{ $tag = merge $tag (dict 
-          "attr" (dict 
-            "integrity" $hash
-          )
+    
+    {{/* We test crossorigin and add the argument if set */}}
+    {{ with $script.crossorigin }}
+      {{ if ne . "none" }}
+        {{ $external_attr = merge $external_attr (dict 
+          "crossorigin" .
         ) }}
       {{ end }}
     {{ end }}
 
-    {{/* If debug, we add a informative attributes */}}
-    {{ if and $debug false }}
-      {{ $tag = merge $tag (dict 
-        "attr" (dict 
-          "data-debug" slice
-        )
-      ) }}
+    {{ with $hash := .Data.Integrity }}
+      {{ if $script.integrity }}
+        {{ $external_attr = merge $external_attr (dict 
+          "integrity" $hash
+        ) }}
+      {{ end }}
     {{ end }}
+
+    {{/* We test attributes and add append the custom arguments to the predefined ones */}}
+    {{ with $script.attributes }}
+      {{ $inline_attr = merge $inline_attr . }}
+      {{ $external_attr = merge $external_attr . }}
+    {{ end }}
+
+    {{ $tag := dict }}
+    {{ if $script.internal }}
+      {{ $tag = dict 
+        "name" "script" 
+        "inner" .Content
+        "attr" $inline_attr
+      }}
+    {{ else }}
+      {{ $tag = dict
+        "name" "script"
+        "attr" $external_attr
+      }}
+    {{ end }}
+
     {{ $tags = $tags | append $tag }}
   {{ end }}
 {{ end }}

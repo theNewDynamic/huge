@@ -49,7 +49,17 @@
   {{ $params := $script.params | default dict }}
   {{ $shims := $script.shims | default slice }}
   {{ $target := $script.target | default "esnext" }}
+  {{ $crossorigin := $script.crossorigin | default "anonymous" }}
+  {{ $attributes := $script.attributes | default dict }}
+  {{ $load := "defer" }}
+  {{/* As this will add a boolean attribute, we want to limit it to defer or async */}}
+  {{ with $script.load }}
+    {{ if eq . "defer" "async" "none" }}
+      {{ $load = . }}
+    {{ end }}
+  {{ end }}
 
+  
   {{ $data = dict
     "name" $name
     "path" $script.path
@@ -64,6 +74,9 @@
     "params" $params
     "shims" $shims
     "target" $target
+    "crossorigin" $crossorigin
+    "attributes" $attributes
+    "load" $load
   }}
 {{ end }}
 
