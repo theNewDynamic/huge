@@ -204,7 +204,7 @@
   {{ end }}
 {{ end }}
 
-{{ if $config.jsonld }}
+{{ if not $config.disable_jsonld }}
 	{{ with $seo }}
 		{{ $s.SetInMap "jsonld" "@context" "https://schema.org" }}
 		{{ $s.SetInMap "jsonld" "@type" .type }}
