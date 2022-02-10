@@ -23,7 +23,7 @@
 {{ $s := newScratch }}
 {{ $s.Set "font" dict }}
 
-{{ with $font := partialCached "huge/fonts/private/ParseFont" . . }}
+{{ with $font := . }}
   {{ with .resources }}
     {{ $css_srcs := slice }}
     {{/* First we add the local() declarations if .local is found */}}
