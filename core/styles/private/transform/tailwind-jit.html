@@ -1,0 +1,9 @@
+{{/* 
+  For now a workaround, as Hugo is not yet supporting Tailwind-JIT.
+  See https://dev.to/jonas_duri/how-to-use-tailwindcss-30-without-external-npm-scripts-just-hugo-pipes-2lg9 from @Gioni06
+  */}}
+{{ $resource := . }}
+{{ if site.IsServer }}
+  {{ $resource = . | resources.ExecuteAsTemplate (printf "tailwind.dev.%v.css" now.UnixMilli) . }}
+{{ end }}
+{{ return $resource }}
