@@ -1,0 +1,28 @@
+{{/*
+  huge/env/GetVar
+  Returns an environment variable from getenv or _huge/config/env.yaml
+
+  @author @regisphilibert
+
+  @context String
+
+  @access public
+
+  @uses
+    - huge/config/Get
+
+  @returns String
+*/}}
+
+{{ $var := "" }}
+{{ with getenv . }}
+  {{ $var = . }}
+{{ else }}
+  {{ with partialCached "huge/config/Get" "env" "env" }}
+    {{ with index . $ }}
+      {{ $var = . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $var }}
