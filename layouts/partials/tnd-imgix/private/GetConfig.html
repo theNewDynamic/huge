@@ -15,6 +15,15 @@
 {{ with partialCached "huge/config/Get" "media" "media" }}
   {{ with .imgix }}
     {{ $config = . }}
+    {{/* To acommodate a per-environment enabling of imgix (imgix will only get images once deployed in production)
+      We prepopulate the imgix module's own `disable` setting with the opposite of Huge's own `enable` settings.
+      */}}
+    {{ with $config.enable }}
+      {{ if not (partialCached "huge/env/When" . .) }}
+        {{ $config = merge $config (dict "disable" true) }}
+      {{ end }}
+    {{ end }}
   {{ end }}
+
 {{ end }}
 {{ return $config }}
