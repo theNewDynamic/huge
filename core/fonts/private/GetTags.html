@@ -31,16 +31,22 @@
 {{ if partialCached "huge/env/When" $prefetch $prefetch }}
   {{/* We list all the fonts in order to produce the data for the "prefetch" tags on all its required files */}}
   {{ range partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
+  {{/* We want to print <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin> */}}
     {{ range .resources }}
-      {{ $tag := dict
-        "name" "link"
-        "attr" (dict
-          "href" .RelPermalink
-          "as" "font"
-          "crossorigin" " "
-          "rel" "prefetch"
-      )}}
-      {{ $tags = $tags | append $tag }}
+      {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
+      {{ if true }}
+        {{ $tag := dict
+          "name" "link"
+          "attr" (dict
+            "href" .RelPermalink
+            "as" "font"
+            "type" (printf "font/%s" $format)
+            "rel" "preload"
+            "crossorigin" " "
+        )}}
+        {{ $tags = $tags | append $tag }}
+      {{ end }}
+
     {{ end }}
   {{ end }}
 {{ end }}

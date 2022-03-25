@@ -1,0 +1,21 @@
+{{/*
+  GetFormat
+  Retrieves the font format of a given resource
+
+  @author @regisphilibert
+
+  @context Resource (.)
+
+  @access private
+
+  @returns String
+
+*/}}
+{{ $format := "" }}
+{{ $format = .MediaType.SubType }}
+{{ $irregular := dict "vnd.ms-fontobject" "embedded-opentype" "ttf" "truetype" "font-sfnt" "truetype" "otf" "opentype" }}
+{{ with index $irregular $format }}
+  {{ $format = . }}
+{{ end }}
+
+{{ return $format }}
