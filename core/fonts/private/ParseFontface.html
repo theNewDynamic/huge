@@ -58,6 +58,7 @@ we add font-{property} to the valid properties */}}
 {{ range $properties }}
   {{ $properties = $properties | append (print "font-" .) }}
 {{ end }}
+
 {{ range $property := $properties }}
   {{ with index $ . }}
     {{ $key := $property }}
@@ -67,6 +68,10 @@ we add font-{property} to the valid properties */}}
     {{ end }}
     {{ $s.SetInMap "font" $key . }}
   {{ end }}
+{{ end }}
+
+{{ if not (index ($s.Get "font") "font-display") }}
+  {{ $s.SetInMap "font" "font-display" "swap" }}
 {{ end }}
 
 {{ return $s.Get "font" }}
