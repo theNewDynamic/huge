@@ -1,0 +1,41 @@
+{{/*
+  huge/fonts/private/GetPreloadTags
+  Construct the tags data based on preload settings.
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @returns Slice of Maps (complying to https://github.com/theNewDynamic/hugo-module-tnd-tags/blob/main/README.md)
+
+  @uses
+     - huge/fonts/private/GetFonts
+     - huge/fonts/private/GetFormat
+*/}}
+{{ $tags := slice }}
+{{/* We list all the fonts in order to produce the data for the "prefetch" tags on all its required files */}}
+{{ range partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
+{{/* We want to print <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin> */}}
+  {{ range .resources }}
+    {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
+    {{/* For now it makes sens to restrict preload to the most supported file format.
+        Future release will allow other file formats to be preloaded.
+      */}}
+    {{ if eq $format "woff2" }}
+      {{ $tag := dict
+        "name" "link"
+        "attr" (dict
+          "href" .RelPermalink
+          "as" "font"
+          "type" "font/woff2"
+          "rel" "preload"
+          "crossorigin" "anonymous"
+      )}}
+      {{ $tags = $tags | append $tag }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $tags }}

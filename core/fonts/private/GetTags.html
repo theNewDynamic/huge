@@ -17,6 +17,16 @@
 {{ $tags := slice }}
 {{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
 
+
+{{/* Preload default is "always" */}}
+{{ $preload := $config.preload | default "always" }}
+{{ if partialCached "huge/env/When" $preload $preload }}
+  {{ with partial "huge/fonts/private/GetPreloadTags" }}
+    {{ $tags = $tags | append . }}
+  {{ end }}
+{{ end }}
+
+
 {{/* We generate a resource from Template (to facilitate future manipulation/http request) */}}
 {{ $fontface := resources.Get "/huge_only/fontface.css" | resources.ExecuteAsTemplate "fontface.css" "no_context" }}
 {{/* Add the tag with Resource's .Content for "inner" */}}
@@ -25,30 +35,5 @@
   "inner" $fontface.Content
 }} 
 {{ $tags = $tags | append $fontface_tag }}
-
-{{/* If prefetching is enabled on the package's config */}}
-{{ $prefetch := $config.prefetch | default "always" }}
-{{ if partialCached "huge/env/When" $prefetch $prefetch }}
-  {{/* We list all the fonts in order to produce the data for the "prefetch" tags on all its required files */}}
-  {{ range partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
-  {{/* We want to print <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin> */}}
-    {{ range .resources }}
-      {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
-      {{ if true }}
-        {{ $tag := dict
-          "name" "link"
-          "attr" (dict
-            "href" .RelPermalink
-            "as" "font"
-            "type" (printf "font/%s" $format)
-            "rel" "preload"
-            "crossorigin" " "
-        )}}
-        {{ $tags = $tags | append $tag }}
-      {{ end }}
-
-    {{ end }}
-  {{ end }}
-{{ end }}
 
 {{ return $tags }}
