@@ -34,11 +34,7 @@
     {{ end }}
 
     {{ range . }}
-      {{ $format := .MediaType.SubType }}
-      {{ $irregular := dict "vnd.ms-fontobject" "embedded-opentype" "ttf" "truetype" "font-sfnt" "truetype" "otf" "opentype" }}
-      {{ with index $irregular $format }}
-        {{ $format = . }}
-      {{ end }}
+      {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
       {{ $css_srcs = $css_srcs | append (printf `url("%s") format("%s")` .RelPermalink $format) }}
     {{ end }}
     {{ with $css_srcs }}
@@ -62,6 +58,7 @@ we add font-{property} to the valid properties */}}
 {{ range $properties }}
   {{ $properties = $properties | append (print "font-" .) }}
 {{ end }}
+
 {{ range $property := $properties }}
   {{ with index $ . }}
     {{ $key := $property }}
@@ -71,6 +68,10 @@ we add font-{property} to the valid properties */}}
     {{ end }}
     {{ $s.SetInMap "font" $key . }}
   {{ end }}
+{{ end }}
+
+{{ if not (index ($s.Get "font") "font-display") }}
+  {{ $s.SetInMap "font" "font-display" "swap" }}
 {{ end }}
 
 {{ return $s.Get "font" }}

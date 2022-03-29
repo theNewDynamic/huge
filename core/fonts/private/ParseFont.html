@@ -26,7 +26,10 @@
 {{ $font := . }}
 {{ with .file }}
   {{ with resources.Match (print "/" . ".*") }}
-    {{ $font = merge $font (dict "resources" .) }}
+    {{/* This ensures woff2 and woff are declared first, it seems we can't realy rely on SubType (cloufflare as '' for woff2...) */}}
+    {{ with sort . "Name" "desc" }}
+      {{ $font = merge $font (dict "resources" (sort . "Name" "desc")) }}
+    {{ end }}
   {{ else }}
   {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `%s`.\nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
   {{ end }}
