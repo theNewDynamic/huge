@@ -18,14 +18,10 @@
 {{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
 
 
-{{/* Preload default is "always" */}}
-{{ $preload := $config.preload | default "always" }}
-{{ if partialCached "huge/env/When" $preload $preload }}
-  {{ with partial "huge/fonts/private/GetPreloadTags" }}
-    {{ $tags = $tags | append . }}
-  {{ end }}
+{{/* We add the preload tags first */}}
+{{ with partialCached "huge/fonts/private/GetPreloadTags" "GetPreloadTags" }}
+  {{ $tags = $tags | append . }}
 {{ end }}
-
 
 {{/* We generate a resource from Template (to facilitate future manipulation/http request) */}}
 {{ $fontface := resources.Get "/huge_only/fontface.css" | resources.ExecuteAsTemplate "fontface.css" "no_context" }}

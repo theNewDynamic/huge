@@ -11,8 +11,9 @@
   @return Map
       String (.family)
       String (.file)
-      Resources (.resources)
       Slice (.local)
+      Boolean (.preload)
+      Resources (.resources)
       String (.family)?
       String (.weight)?
       String (.style)?
@@ -24,6 +25,8 @@
 
 */}}
 {{ $font := . }}
+{{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
+
 {{ with .file }}
   {{ with resources.Match (print "/" . ".*") }}
     {{/* This ensures woff2 and woff are declared first, it seems we can't realy rely on SubType (cloufflare as '' for woff2...) */}}
@@ -38,5 +41,18 @@
 {{ with partialCached "huge/fonts/private/GetLocals" . . }}
   {{ $font = merge $font (dict "local" .) }}
 {{ end }}
+
+{{/* We'll charge the parsed font with its `preload` preference. */}}
+{{ $preload := false }}
+{{/* First we check for the global setting */}}
+{{ $preload_setting := $config.preload | default "always" }}
+{{ if partialCached "huge/env/When" $preload_setting $preload_setting }}
+  {{ $preload = . }}
+{{ end }}
+{{/* if preload is set (can be `false`) on the declaration itself, it overwrites global's */}}
+{{ if isset $ "preload" }}
+  {{ $preload = $.preload }}
+{{ end }}
+{{ $font = merge $font (dict "preload" $preload) }}
 
 {{ return $font }}
