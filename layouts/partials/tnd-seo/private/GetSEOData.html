@@ -111,7 +111,10 @@
 	{{/* If no SEO IMAGE is set, we look for the .Params.images slice
 		and use the first one if it has an `image` key */}}
 	{{ with .Params.image }}
-		{{ $img = . }}
+		{{/* Only if .image is a string */}}
+		{{ if and (not (reflect.IsMap .)) (not (reflect.IsSlice .)) }}
+			{{ $img = . }}
+		{{ end }}
 	{{ end }}
 	{{ with .Params.images  }}
 		{{ with index . 0  }}
