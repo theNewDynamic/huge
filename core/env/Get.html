@@ -12,5 +12,9 @@
 */}}
 
 {{ $env := hugo.Environment }}
-
+{{ range slice "HUGO_ENV" "HUGO_ENVIRONMENT" }}
+  {{ with getenv . }}
+    {{ $env = . }}
+  {{ end }}
+{{ end }}
 {{ return $env }}
