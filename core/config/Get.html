@@ -21,9 +21,15 @@
 {{ $config := dict }}
 {{ $dir := "_huge/config" }}
 
-{{ with resources.GetMatch (printf "/%s/%s.*" $dir $) }}
+{{ with $resource := resources.GetMatch (printf "/%s/%s.*" $dir $) }}
   {{ with .Content }}
-    {{ $config = . | transform.Unmarshal }}
+    {{ $content := . }}
+    {{ if in . "{{" }}
+      {{ with resources.ExecuteAsTemplate $ "context" $resource }}
+        {{ $content = .Content }}
+      {{ end }}
+    {{ end }}
+    {{ $config = $content | transform.Unmarshal }}
   {{ end }}
 {{ end }}
 
