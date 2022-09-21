@@ -24,5 +24,7 @@
     {{ end }}
   {{ end }}
 {{ end }}
-
+{{ with $var }}{{ else }}
+  {{ partial "huge/console/warn" (printf "Env: The environment variable %s is invoked but not set." $) }}
+{{ end }}
 {{ return $var }}
