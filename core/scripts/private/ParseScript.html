@@ -46,6 +46,7 @@
   {{ $minify = partialCached "huge/env/When" $minify $minify }}
   {{ $fingerprint := $script.fingerprint | default "production" }}
   {{ $fingerprint = partialCached "huge/env/When" $fingerprint $fingerprint }}
+  {{ $rename := $script.rename | default "" }}
   {{ $params := $script.params | default dict }}
   {{ $shims := $script.shims | default slice }}
   {{ $target := $script.target | default "esnext" }}
@@ -71,6 +72,7 @@
     "externals" $externals
     "minify" $minify
     "fingerprint" $fingerprint
+    "rename" $rename
     "params" $params
     "shims" $shims
     "target" $target

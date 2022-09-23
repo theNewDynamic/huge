@@ -27,10 +27,15 @@
   {{ $resource = . | js.Build $options }}
 {{ end }}
 
-{{/* Fingerprinting is the only settings which is not part of the js.Build $options,
+{{/* Fingerprinting is the only setting which is not part of the js.Build $options,
   we perform that extra transformation here if needed. */}}
 {{ if $.fingerprint }}
   {{ $resource = $resource | fingerprint }}
+{{ end }}
+
+{{/* If user wants to customize the output path with the `rename` setting. */}}
+{{ with $.rename }}
+  {{ $resource = $resource | resources.Copy . }}
 {{ end }}
 
 {{ return $resource }}
