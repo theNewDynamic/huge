@@ -27,10 +27,20 @@
 {{ else }}
   {{ partial "huge/console/warn" (printf "Style file with path %s is not found" .path) }}
 {{ end }}
-
 {{ with $resource }}
   {{ range $.transformations }}
-    {{ $resource = partial (print "huge/styles/private/transform/" .) $resource }}
+    {{ $partial := . }}
+    {{ $context := $resource }}
+    {{/* Some transformation holds arguments with a map context. For those, the partial name
+      will be held in .transformation while the context (or arguments) are hold in .context */}}
+    {{ if reflect.IsMap . }}
+      {{ $context = dict
+        "resource" $resource
+        "context" .context
+      }}
+      {{ $partial = .transformation }}
+    {{ end }}
+    {{ $resource = partial (print "huge/styles/private/transform/" $partial) $context }}
   {{ end }}
 {{ end }}
 
