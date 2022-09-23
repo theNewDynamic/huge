@@ -59,8 +59,8 @@
 {{ if partialCached "huge/env/When" $fingerprint $fingerprint }}
   {{ $transformations = $transformations | append "fingerprint" }}
 {{ end }}
-{{/* Most transformations don't need any arguments except for rename. We'll use a map for context */}}
-{{ with .rename }}
+{{/* Most transformations don't need any arguments except for output_path. We'll use a map for context */}}
+{{ with .output_path }}
   {{ $transformations = $transformations | append (dict
     "transformation" "copy"
     "context" .

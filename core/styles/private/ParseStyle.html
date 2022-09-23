@@ -27,14 +27,14 @@
   {{ $transformations := partial "huge/styles/private/GetTransformations" $style | default slice }}
   {{ $internal := $style.internal | default false }}
   {{ $integrity := $style.integrity | default false }}
-  {{ $rename := $style.rename | default false }}
+  {{ $output_path := $style.output_path | default false }}
   {{ $data = dict
     "name" $name
     "path" $style.path
     "internal" $internal
     "integrity" $integrity
     "transformations" $transformations
-    "rename" $rename
+    "output_path" $output_path
   }}
 {{ end }}
 
