@@ -30,10 +30,12 @@
 {{ with $config.env_keys }}
   {{ if reflect.IsSlice . }}
     {{ range $var := . }}
-      {{ with getenv . }}
+      {{ with partial "huge/env/GetVar" . }}
         {{ $key := print "process.env." $var }}
         {{ $value := printf `"%s"` . }}
         {{ $s.SetInMap "defines" $key $value }}
+      {{ else }}
+        {{ partial "huge/console/warn" (printf "Scripts: The environement variable %s requested by a script is missing." $var) }}
       {{ end }}
     {{ end }}
   {{ else }}
