@@ -21,9 +21,6 @@
 {{ $data := dict }}
 {{ with $style := . }}
   {{ $name := $style.name | default $style.path }}
-  
-  {{/* Huge will not take a null value (emtpy slice) as context for a returning partial (+minVer+: fixed in 0.90.0),
-    we therfore default on "none" for $defines, and test the type of context from within the partial */}}
   {{ $transformations := partial "huge/styles/private/GetTransformations" $style | default slice }}
   {{ $internal := $style.internal | default false }}
   {{ $integrity := $style.integrity | default false }}
