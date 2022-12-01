@@ -10,31 +10,32 @@
 
   @return Slice of strings
 */}}
-{{ $local := slice }}
+{{ $local_output := slice }}
 
 {{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
 
-{{/* We add local */}}
-{{/* 1. Font local setting is ommited */}}
-{{ $add_local := not (isset . "local") }}
-{{/* 2. OR font local setting is not `false` */}}
-{{ $add_local = $add_local | or (ne .local false) }}
-{{/* 2. AND fonts global setting `disable_local` is not true */}}
-{{ $add_local = $add_local | and (not $config.disable_local) }}
+{{/* Default is always true, meaning we built it ourselves */}}
+{{ $local := true }}
 
-{{ if $add_local }}
-  {{ with .local }}
-    {{/* This safely append the value of .local (a string or a slice) to the $local slice */}}
-    {{ $local = $local | append . }}
-  {{ else }}
-    {{/* If local is not set, we'll build it ourselves based on the font family name */}}
-    {{ with .family }}
-      {{ $local = $local | append . }}
+{{ if isset $ "local" }}
+  {{ $local = $.local }}
+{{ end }}
+{{/* If local is neither true nor false, it means it is a string or a slice */}}
+{{ if not (in (slice true false) $local) }}
+  {{/* This safely append the value of .local (a string or a slice) to the $local slice */}}
+  {{ $local_output = $local_output | append $local }}
+{{ else }}
+  {{/* Only if it's true... */}}
+  {{ if $local }}
+    {{ with $.family }}
+      {{ $local_output = $local_output | append . }}
       {{/* If a whitespace is in the family name, we can add a local with dash in place of ws */}}
       {{ if in . " " }}
-        {{ $local = $local | append (replace . " " "-") }}
+        {{ $local_output = $local_output | append (replace . " " "-") }}
       {{ end }}
     {{ end }}
   {{ end }}
+  
 {{ end }}
-{{ return $local }}
+
+{{ return $local_output }}

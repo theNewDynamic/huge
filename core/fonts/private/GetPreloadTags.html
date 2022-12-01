@@ -16,26 +16,30 @@
 */}}
 {{ $tags := slice }}
 {{/* We list all the fonts in order to produce the data for the "prefetch" tags on all its required files */}}
-{{ range partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
-  {{ if .preload }}
-    {{/* We want to print <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin> */}}
-    {{ range .resources }}
+{{/* We want to print `<link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin="anonymous">` */}}
+{{ range $font :=  partialCached "huge/fonts/private/GetFonts" "GetFonts" }}
+  {{ with $preload := .preload }}
+    {{ range $font.resources }}
       {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
-      {{/* For now it makes sens to restrict preload to the most supported file format.
-          Future release will allow other file formats to be preloaded.
-        */}}
-      {{ if eq $format "woff2" }}
-        {{ $tag := dict
-          "name" "link"
-          "attr" (dict
-            "href" .RelPermalink
-            "as" "font"
-            "type" "font/woff2"
-            "rel" "preload"
-            "crossorigin" "anonymous"
-        )}}
-        {{ $tags = $tags | append $tag }}
+      {{/* If user resrticts preloading by format */}}
+      {{ if reflect.IsSlice $preload }}
+        {{/* If said font format not in the preload format list, we skip this resource */}}
+        {{ if not (in $preload $format) }}
+          {{ continue }}
+        {{ end }}
       {{ end }}
+      {{/* Test above failed, we can proceeed */}}
+      {{ $tag := dict
+        "name" "link"
+        "attr" (dict
+          "href" .RelPermalink
+          "as" "font"
+          "type" (partialCached "huge/fonts/private/GetMediaType" . .)
+          "rel" "preload"
+          "crossorigin" "anonymous"
+        )
+      }}
+      {{ $tags = $tags | append $tag }}
     {{ end }}
   {{ end }}
 {{ end }}

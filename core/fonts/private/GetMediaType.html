@@ -11,23 +11,14 @@
   @returns String
 
 */}}
-{{ $format := "woff2" }}
+{{ $SubType := "woff2" }}
 {{/* It appears CloudFlare produces an empty string when calling .MediaType.SubType on a woff2...
     As this is by far the best font format these days in terms of support and optimization,
     making it default to ensure it is not botched by cloudflare is "ok".
 */}}
 {{ with .MediaType.SubType }}
-  {{ $format = . }}
+  {{ $SubType = . }}
 {{ end }}
-{{ $irregular := dict 
-  "vnd.ms-fontobject" "embedded-opentype"
-  "font-woff" "woff"
-  "font-sfnt" "opentype"
-  "ttf" "truetype" 
-  "otf" "opentype"
-  "svgz" "svg"
-}}
-{{ with index $irregular $format }}
-  {{ $format = . }}
-{{ end }}
-{{ return $format }}
+{{ $MainType := .MediaType.MainType }}
+
+{{ return printf "%s/%s" $MainType $SubType }}

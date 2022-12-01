@@ -9,7 +9,7 @@
   @access private
 
   @use
-    - huge/fonts/privateParseFont
+    - huge/fonts/private/ParseFont
 
   @return Map
     String (.font-family)
@@ -41,37 +41,12 @@
       {{ $s.SetInMap "font" "src" (delimit . ",\n") }}
     {{ end }}
   {{ end }}
-{{ end }}
 
-{{ $properties := slice 
-  "family"
-  "weight"
-  "style"
-  "display"
-  "variant"
-  "feature-settings"
-  "variation-settings"
-  "stretch" 
-}}
-{{/* In order to tolerate if user uses `font-{property}: value` in the settings instead of `{property}: value`,
-we add font-{property} to the valid properties */}}
-{{ range $properties }}
-  {{ $properties = $properties | append (print "font-" .) }}
-{{ end }}
-
-{{ range $property := $properties }}
-  {{ with index $ . }}
-    {{ $key := $property }}
-    {{/* If missing font- we prepend the property */}}
-    {{ if not (in $key "font-") }}
-      {{ $key = print "font-" $property }}
+  {{ with .properties }}
+    {{ range $key, $v := . }}
+      {{ $s.SetInMap "font" (print "font-" $key) . }}
     {{ end }}
-    {{ $s.SetInMap "font" $key . }}
   {{ end }}
-{{ end }}
-
-{{ if not (index ($s.Get "font") "font-display") }}
-  {{ $s.SetInMap "font" "font-display" "swap" }}
 {{ end }}
 
 {{ return $s.Get "font" }}
