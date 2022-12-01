@@ -36,7 +36,7 @@
       {{ $s.SetInMap "data" "resources" (sort . "Name" "desc")  }}
     {{ end }}
   {{ else }}
-  {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `%s`.\nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
+    {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `/%s`.\nAs a result no @font-face CSS at-rule will be printed for this font. \nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
   {{ end }}
 {{ end }}
 
@@ -66,5 +66,9 @@
   {{ $preload = $.preload }}
 {{ end }}
 {{ $s.SetInMap "data" "preload" $preload }}
+
+{{ if not ($s.Get "data").resources }}
+  {{ $s.Set "data" dict }}
+{{ end }}
 
 {{ return $s.Get "data" }}
