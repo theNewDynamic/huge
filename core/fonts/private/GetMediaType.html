@@ -24,7 +24,7 @@
   {{ $MainType = . }}
 {{ end }}
 
-{{ $MediaType := "%s/%s" $MainType $SubType }}
+{{ $format := printf "%s/%s" $MainType $SubType }}
 
 {{/* Another weirdness for some files depending on hosting plaftorm. 
   Some woff file would return application/font-woff 
@@ -37,4 +37,4 @@
   {{ $format = . }}
 {{ end }}
 
-{{ return printf "%s/%s" $MainType $SubType }}
+{{ return $format }}
