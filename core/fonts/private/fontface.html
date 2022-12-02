@@ -17,7 +17,11 @@
 {{- with partialCached "huge/fonts/private/ParseFontface" . . -}}
   @font-face {
 {{- range $key, $val := . }}
+  {{- if eq $key "font-family" }}
+  {{ $key }}: "{{ $val }}";
+  {{- else }}
   {{ $key }}: {{ $val }};
+  {{- end -}}
 {{- end }}
 }
 {{ end }}
