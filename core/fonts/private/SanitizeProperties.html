@@ -1,0 +1,38 @@
+{{/*
+  SanitizeProperties
+  Eliminate any property which is not a font property to be used in @font-face declaration. 
+  Also clean the key (font-display > display)
+
+  @author @regisphilibert
+
+  @context Map (.)
+
+  @access private
+
+  @returns Map
+
+*/}}
+{{ $s := newScratch }}
+{{ $s.Set "data" dict }}
+
+{{ $property_keys := slice 
+  "family"
+  "weight"
+  "style"
+  "display"
+  "variant"
+  "feature-settings"
+  "variation-settings"
+  "stretch" 
+}}
+{{ range $key := $property_keys }}
+  {{ with index $ $key  }}
+    {{ $s.SetInMap "data" $key . }}
+  {{ else }}
+    {{ with index $ (printf "font-" $key) }}
+      {{ $s.SetInMap "data" $key . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $s.Get "data" }}

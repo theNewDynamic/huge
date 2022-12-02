@@ -22,12 +22,12 @@
 {{ $irregular := dict 
   "vnd.ms-fontobject" "embedded-opentype"
   "font-woff" "woff"
-  "ttf" "truetype"
-  "font-sfnt" "truetype" 
-  "otf" "opentype" 
+  "font-sfnt" "opentype"
+  "ttf" "truetype" 
+  "otf" "opentype"
+  "svgz" "svg"
 }}
 {{ with index $irregular $format }}
   {{ $format = . }}
 {{ end }}
-
 {{ return $format }}

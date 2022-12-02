@@ -1,0 +1,40 @@
+{{/*
+  GetFormat
+  Retrieves the font format of a given resource
+
+  @author @regisphilibert
+
+  @context Resource (.)
+
+  @access private
+
+  @returns String
+
+*/}}
+{{ $MainType := "font" }}
+{{ $SubType := "woff2" }}
+{{/* It appears CloudFlare produces an empty string when calling .MediaType.MainType or .MediaType.SubType on a woff2...
+    As this is by far the best font format these days in terms of support and optimization,
+    making it default to ensure it is not botched by cloudflare is "ok".
+*/}}
+{{ with .MediaType.SubType }}
+  {{ $SubType = . }}
+{{ end }}
+{{ with .MediaType.MainType }}
+  {{ $MainType = . }}
+{{ end }}
+
+{{ $format := printf "%s/%s" $MainType $SubType }}
+
+{{/* Another weirdness for some files depending on hosting plaftorm. 
+  Some woff file would return application/font-woff 
+  But Chrome will print a `<link rel=preload> has an unsupported `type` value` warning on non-font "types".
+*/}}
+{{ $irregular := dict 
+  "application/font-woff" "font/woff"
+}}
+{{ with index $irregular $format }}
+  {{ $format = . }}
+{{ end }}
+
+{{ return $format }}

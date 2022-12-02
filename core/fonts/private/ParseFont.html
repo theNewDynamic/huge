@@ -1,6 +1,6 @@
 {{/*
   ParseFont
-  Parse data from Module's settings font declaration. For now it only adds a .resources containing the font files assets.
+  Parse data from Module's settings font declaration and base declarations
 
   @author @regisphilibert
 
@@ -9,50 +9,68 @@
   @access private
 
   @return Map
-      String (.family)
       String (.file)
       Slice (.local)
-      Boolean (.preload)
+      Boolean | Slice of Strings (.preload)
+      String (.tech)
       Resources (.resources)
-      String (.family)?
-      String (.weight)?
-      String (.style)?
-      String (.display)?
-      String (.variant)?
-      String (.feature-settings)?
-      String (.variation-settings)?
+      Map (.propertiers)
+        String (.family)
+        String (.weight)?
+        String (.style)?
+        String (.display)?
+        String (.variant)?
+        String (.feature-settings)?
+        String (.variation-settings)?
       
 
 */}}
-{{ $font := . }}
+{{ $s := newScratch }}
+{{ $s.Set "data" dict }}
+
 {{ $config := partialCached "huge/config/Get" "fonts" "fonts" }}
 
 {{ with .file }}
   {{ with resources.Match (print "/" . ".*") }}
     {{/* This ensures woff2 and woff are declared first, it seems we can't realy rely on SubType (cloufflare as '' for woff2...) */}}
     {{ with sort . "Name" "desc" }}
-      {{ $font = merge $font (dict "resources" (sort . "Name" "desc")) }}
+      {{ $s.SetInMap "data" "resources" (sort . "Name" "desc")  }}
     {{ end }}
   {{ else }}
-  {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `%s`.\nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
+    {{ partial "huge/console/warn" (printf "We did not find matching font files for basename `/%s`.\nAs a result no @font-face CSS at-rule will be printed for this font. \nFont files should be added to the project's `assets` directory and match the relative path set in the font's settings." .) }}
   {{ end }}
 {{ end }}
 
-{{ with partialCached "huge/fonts/private/GetLocals" . . }}
-  {{ $font = merge $font (dict "local" .) }}
+{{ $font := . }}
+{{ with $config.cascade }}
+  {{ $font = merge . $font }}
 {{ end }}
 
-{{/* We'll charge the parsed font with its `preload` preference. */}}
-{{ $preload := false }}
-{{/* First we check for the global setting */}}
-{{ $preload_setting := $config.preload | default "always" }}
-{{ if partialCached "huge/env/When" $preload_setting $preload_setting }}
-  {{ $preload = . }}
+{{ with partialCached "huge/fonts/private/GetLocals" $font $font }}
+  {{ $s.SetInMap "data" "local" . }}
 {{ end }}
-{{/* if preload is set (can be `false`) on the declaration itself, it overwrites global's */}}
-{{ if isset $ "preload" }}
-  {{ $preload = $.preload }}
-{{ end }}
-{{ $font = merge $font (dict "preload" $preload) }}
 
-{{ return $font }}
+
+{{ with partialCached "huge/fonts/private/SanitizeProperties" $font $font }}
+  {{ $s.SetInMap "data" "properties" . }}
+{{ end }}
+
+{{/* We preload by default */}}
+{{ $preload := true }}
+{{/* We use `isset` to ensure a falsy value is taken into account if set. */}}
+{{ if isset $font "preload" }}
+  {{ $preload = $font.preload }}
+{{ end }}
+
+
+{{ with $font.tech }}
+  {{ $s.SetInMap "data" "tech" . }}
+{{ end }}
+
+{{ $s.SetInMap "data" "preload" $preload }}
+
+{{ if not ($s.Get "data").resources }}
+  {{ $s.Set "data" dict }}
+{{ end }}
+
+{{ return $s.Get "data" }}
