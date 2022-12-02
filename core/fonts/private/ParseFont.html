@@ -12,6 +12,7 @@
       String (.file)
       Slice (.local)
       Boolean | Slice of Strings (.preload)
+      String (.tech)
       Resources (.resources)
       Map (.propertiers)
         String (.family)
@@ -54,13 +55,16 @@
   {{ $s.SetInMap "data" "properties" . }}
 {{ end }}
 
+{{/* We preload by default */}}
 {{ $preload := true }}
+{{/* We use `isset` to ensure a falsy value is taken into account if set. */}}
+{{ if isset $font "preload" }}
+  {{ $preload = $font.preload }}
+{{ end }}
 
-{{ with $font }}
-  {{/* Isset to ensure a falsy value is taken into account if set. */}}
-  {{ if isset . "preload" }}
-    {{ $preload = .preload }}
-  {{ end }}
+
+{{ with $font.tech }}
+  {{ $s.SetInMap "data" "tech" . }}
 {{ end }}
 
 {{ $s.SetInMap "data" "preload" $preload }}

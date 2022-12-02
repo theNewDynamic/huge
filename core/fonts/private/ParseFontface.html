@@ -35,7 +35,11 @@
 
     {{ range . }}
       {{ $format := partialCached "huge/fonts/private/GetFormat" . .MediaType.SubType }}
-      {{ $css_srcs = $css_srcs | append (printf `url("%s") format("%s")` .RelPermalink $format) }}
+      {{ $src := printf `url("%s") format("%s")` .RelPermalink $format }}
+      {{ with $font.tech }}
+        {{ $src = printf `%s tech("%s")` $src . }}
+      {{ end }}
+      {{ $css_srcs = $css_srcs | append  $src }}
     {{ end }}
     {{ with $css_srcs }}
       {{ $s.SetInMap "font" "src" (delimit . ",\n") }}
