@@ -1,0 +1,57 @@
+{{/*
+  tests/GetAll
+  Returns all the tests (success or fails)
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access public
+
+  @returns Slice of Maps
+    - String (.id)
+      String (.partial)
+      String (.name)
+      Boolean (.test)
+*/}}
+{{ $logs := slice }}
+{{ with resources.Match "_huge/tests/**" }}
+  {{ range . }}
+    {{ $test_partial := replace .Name "_huge/tests/" "" }}
+    {{ $partial := replace $test_partial "__test" "" }}
+    {{ with partial $test_partial $test_partial }}
+      {{ $tests := . }}
+      {{ if reflect.IsMap . }}
+        {{ $tests = slice . }}
+      {{ end }}
+      {{ range $index, $v := $tests }}
+        {{ $test := false }}
+        {{/* If no name is set, we use the $index */}}
+        {{ $name := .name | default (add $index 1 | string) }}
+        {{/* If user added the test themselves, we use that */}}
+        {{ if isset . "test" }}
+          {{ $test = .test }}
+        {{ else }}
+          {{/* If not, we simply compare the output of the partial with the expected output */}}
+          {{ $input := .input }}
+          {{ $output := .output }}
+          {{ with $result := partial $partial $input }}
+            {{ if eq $output . }}
+              {{ $test = true }}
+            {{ end }}
+          {{ end }}
+        {{ end }}
+
+        {{/* We add the test data to the logs */}}
+        {{ $logs = $logs | append (dict
+          "id" (print $partial "_" $name)
+          "partial" $partial
+          "name" $name 
+          "test" $test
+        ) }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $logs }}

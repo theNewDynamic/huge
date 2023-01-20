@@ -1,0 +1,23 @@
+{{/*
+  tests/GetAllFails
+  List all fails tests
+
+  @author @regisphilibert
+
+  @context Any (.)
+
+  @access private
+
+  @returns See huge/tests/GetAll@returns
+
+  @uses
+     - huge/tests/GetAll
+*/}}
+{{ $logs := slice }}
+{{ with partialCached "huge/tests/GetAll" "GetAll" }}
+  {{ with where . ".test" "!=" true }}
+    {{ $logs = . }}
+  {{ end }}
+{{ end }}
+
+{{ return $logs }}
