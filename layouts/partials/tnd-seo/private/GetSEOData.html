@@ -42,7 +42,7 @@
 {{  end  }}
 
 {{/* Description
-	---------------------------- 
+	----------------------------
 	We use the following order of precedence
 	1. SEO Description, then, if not found,
 	2. Description, then if not found,
@@ -71,9 +71,9 @@
 	{{ end }}
 {{ end }}
 
- 
+
 {{/* Title
-  ---------------------------- 
+  ----------------------------
 	We use the following logic
 	1. Every pages: `{.Title} | {site.Title}`
 	2. Homepage: , only {site.Title} */}}
@@ -152,11 +152,6 @@
 	{{  $s.SetInMap "seo" "twitter_card" "summary"  }}
 {{ end }}
 
-
-{{/* We check the site config sports a Social.twitter and use as handle */}}
-{{  with .Site.Social.twitter  }}
-	{{  $s.SetInMap "seo" "twitter_handle" (printf "@%s" .)  }}
-{{  end  }}
 
 {{/* We check if the page is not set as private */}}
 {{ with $.Params.seo.private }}
