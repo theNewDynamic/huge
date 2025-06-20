@@ -1,0 +1,18 @@
+{{ $tailwind := printf `
+  @import "tailwindcss";
+  @source "hugo_stats.json";
+  %s
+` .Content }}
+
+{{/* .FromString takes a path, we can't rely on the .Name's as it may include `.scss` extnesion,
+  even after having been transformed to css by .toCSS.
+  We therfore replace .Name extension with css and use the resulted string as path.
+*/}}
+{{ $path := replace .Name (path.Ext .Name) ".css" }}
+{{ $opts := dict
+  "inlineImports" true
+  "optimize" (not hugo.IsDevelopment)
+}}
+{{ $resource := $tailwind | resources.FromString $path | css.TailwindCSS $opts}}
+
+{{ return $resource }}

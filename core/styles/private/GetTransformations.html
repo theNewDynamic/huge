@@ -10,6 +10,7 @@
   - PostProcess
   - tailwind
   - tailwind-jit
+  - tailwind-defer
   - toCSS
 
   @author @regisphilibert
@@ -31,13 +32,15 @@
 */}}
 {{ $transformations := slice "toCSS" }}
 
-{{ $NotServer := not site.IsServer }}
+{{ $NotServer := not hugo.IsServer }}
 
 {{ with .use }}
   {{ if in . "tailwind" }}
-    {{ $transformations = $transformations | append (slice "tailwind" "PostCSS") }}
+    {{ $transformations = $transformations | append (slice "tailwind") }}
+  {{ else if in . "tailwind-v4" }}
+    {{ $transformations = $transformations | append (slice "tailwind-v4") }}
   {{ else if in . "tailwind-jit" }}
-  {{ $transformations = $transformations | append (slice "tailwind" "tailwind-jit" "PostCSS") }}
+  {{ $transformations = $transformations | append (slice "tailwind" "tailwind-jit") }}
   {{ else }}
     {{ if in . "postcss" }}
       {{ $transformations = $transformations | append "PostCSS" }}
@@ -68,7 +71,7 @@
 {{ end }}
 {{ if $NotServer }}
   {{ with .use }}
-    {{ if or (in . "tailwind") (in . "postprocess") }}
+    {{ if (in . "postprocess") }}
         {{ $transformations = $transformations | append "PostProcess" }}
     {{ end }}
   {{ end }}
