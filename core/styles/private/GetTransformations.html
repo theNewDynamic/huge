@@ -31,7 +31,7 @@
 */}}
 {{ $transformations := slice "toCSS" }}
 
-{{ $NotServer := not site.IsServer }}
+{{ $NotServer := not hugo.IsServer }}
 
 {{ with .use }}
   {{ if in . "tailwind" }}
